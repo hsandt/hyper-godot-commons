@@ -33,3 +33,45 @@ Currently, unit tests only cover MathUtils functions, except those depending on 
 
 Improvement suggestions and bug reports are welcome in the [Issues](https://github.com/hsandt/hyper-godot-commons/issues). I generally don't take pull requests at the moment, but if you open an issue, we can discuss it further and see what can be done.
 
+## Features
+
+### Audio
+
+- [OneShotAudioStreamPlayer](audio/OneShotAudioStreamPlayer.gd) + template scene: Subclass of AudioStreamPlayer that frees itself when audio stream has finished playing
+    - `play_audio_stream`
+
+- [SFXManager](audio/SFXManager.gd) + template scene: A manager class to easily spawn one-shot SFX
+    - `spawn_sfx`
+
+### Singleton
+
+- [AppManager](singleton/AppManager.gd) + template scene: Application manager class that provides app features
+  - `auto_fullscreen_in_standalone` flag: auto-switch to fullscreen on standalone game start
+  - `change_resolution`: change resolution among customizable presets in `preset_resolutions`
+  - `toggle_fullscreen`: toggle fullscreen
+  - `toggle_debug_overlay`: toggle debug overlay references in `debug_overlay` (overlay canvas and script must be defined separately)
+  - `take_screenshot`: take screenshot
+
+
+### Utils
+
+- [CanvasItemUtils](utils/CanvasItemUtils.gd)
+    - `get_absolute_z_index`: Return the absolute Z index of a CanvasItem
+
+- [DebugUtils](utils/DebugUtils.gd)
+    - `assert_member_is_set`: Assert that member is set on context
+
+- [MathEnums](utils/MathEnums.gd)
+- [MathUtils](utils/MathUtils.gd)
+    - `exclusive_randf`: Return a random float in [0; 1)
+    - `is_cardinal_direction_horizontal`: Return true if passed cardinal direction is horizontal, false if vertical
+    - `horizontal_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero horizontal axis value
+    - `vertical_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero vertical axis value
+    - `cardinal_direction_to_vector2i`: Return Vector2i corresponding to cardinal direction
+
+- [NodeUtils](utils/NodeUtils.gd)
+    - `queue_free_children`: Call queue free on all children of node
+    - `instantiate_under`: Instantiate a packed scene under a parent
+    - `instantiate_under_at`: Instantiate a packed scene under a parent at a global position
+
+
