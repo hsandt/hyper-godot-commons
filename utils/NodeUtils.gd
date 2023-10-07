@@ -21,17 +21,3 @@ static func instantiate_under_at(packed_scene: PackedScene, parent: Node, global
 	parent.add_child(instance)
 	instance.global_position = global_position
 	return instance
-
-
-## Return the absolute Z index of a Node2D
-static func get_absolute_z_index(target: Node2D) -> int:
-	# Thanks to Bruno Ely
-	# See https://godotengine.org/qa/46915/getting-the-absolute-z-index-of-a-node
-	var node = target;
-	var z_index = 0;
-	while node and node.is_class('Node2D'):
-		z_index += node.z_index;
-		if !node.z_as_relative:
-			break;
-		node = node.get_parent();
-	return z_index;
