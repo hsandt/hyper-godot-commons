@@ -45,6 +45,12 @@ var current_frame: int
 
 
 func _ready():
+	# Autoload singletons are placed at the top of the scene tree
+	# and are therefore processed first, but to be safe we set
+	# low priority values for the AppManager
+	process_priority = -100
+	process_physics_priority = -100
+
 	if DisplayServer.window_get_mode() not in \
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN] and \
 			auto_fullscreen_in_standalone:
