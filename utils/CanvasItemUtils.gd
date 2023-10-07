@@ -1,4 +1,5 @@
 class_name CanvasItemUtils
+## Util static functions for CanvasItem nodes
 
 
 ## Return the absolute Z index of a CanvasItem

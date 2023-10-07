@@ -1,5 +1,17 @@
 class_name SFXManager
 extends Node
+## A manager class to easily spawn one-shot SFX
+##
+## Usage:
+## - create scene SFXManager.tscn with one node with this script
+##   (the easiest is to copy SFXManagerTemplate.tscn)
+## - instantiate that scene in whichever way you prefer,
+##   access it from the script that needs to spawn a one-shot SFX
+##   and call spawn_sfx
+##   (the easiest is to instantiate an SFXManager node at edit time
+##   in any scene that needs it and flag it with Access as Unique Name,
+##   but you can also instantiate the SFXManager at runtime automatically
+##   on game start or when you enter a new scene)
 
 
 ## Prefab of OneShotAudioStreamPlayer used to play SFX

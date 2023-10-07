@@ -1,4 +1,5 @@
 class_name DebugUtils
+## Util static functions for debugging
 
 
 ## Assert that member is set on context

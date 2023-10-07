@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dnvlt4yqrwr38"]
+
+[ext_resource type="Script" path="res://addons/hyper-godot-commons/singleton/AppManager.gd" id="1_dpv1y"]
+
+[node name="AppManager" type="Node"]
+script = ExtResource("1_dpv1y")

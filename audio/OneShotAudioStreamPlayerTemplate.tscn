@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bfjj44f1wfnw1"]
+
+[ext_resource type="Script" path="res://addons/hyper-godot-commons/audio/OneShotAudioStreamPlayer.gd" id="1_bcbkh"]
+
+[node name="OneShotAudioStreamPlayer" type="AudioStreamPlayer"]
+script = ExtResource("1_bcbkh")

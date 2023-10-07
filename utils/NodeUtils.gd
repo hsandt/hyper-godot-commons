@@ -1,4 +1,5 @@
 class_name NodeUtils
+## Util static functions for general nodes
 
 
 ## Call queue free on all children of node

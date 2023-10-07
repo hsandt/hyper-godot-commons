@@ -1,4 +1,5 @@
 class_name MathUtils
+## Util static functions for math/geometry and random operations
 
 
 ## Return a random float in [0; 1)

@@ -1,18 +1,24 @@
 extends Node
-
-## Application Manager
-## Define it as autoload singleton scene
-## Prefer a low Process Priority like -10 so current_frame is reliable
+## Application manager class that provides app features:
+## - change resolution and toggle fullscreen
+## - auto fullscreen on standalone game start
+## - toggle debug overlay (needs to be defined separately)
+## - take screenshot
 ##
-## Input Map
-## Define input for the following actions:
-##   app_prev_resolution
-##   app_next_resolution
-##   app_toggle_fullscreen - recommended: F11 (application style), Alt+Enter (Linux/Windows style),
-##                                        Ctrl+Meta+F (macOS style)
-##   app_toggle_debug_overlay
-##   app_take_screenshot
-##   app_exit - recommended: Ctrl+Q (Linux/Windows style) and Meta+Q (macOS style)
+## Usage:
+## - create scene AppManager.tscn and register it as autoload singleton scene
+##   (the easiest is to copy AppManagerTemplate.tscn)
+## - define input for the following actions:
+##     app_prev_resolution
+##     app_next_resolution
+##     app_toggle_fullscreen - recommended: F11 (application style),
+##                                          Alt+Enter (Linux/Windows style),
+##                                          Ctrl+Meta+F (macOS style)
+##     app_toggle_debug_overlay
+##     app_take_screenshot
+##     app_exit - recommended: Ctrl+Q (Linux/Windows style),
+##                             Meta+Q (macOS style)
+
 
 ## Emitted when fullscreen is toggled via AppManager shortcuts
 signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
