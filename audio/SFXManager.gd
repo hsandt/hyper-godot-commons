@@ -4,7 +4,8 @@ extends Node
 ##
 ## Usage:
 ## - create scene SFXManager.tscn with one node with this script
-##   (the easiest is to copy SFXManagerTemplate.tscn)
+##   (the easiest is to copy SFXManagerTemplate.tscn, which has
+##   an SFXParent setup as child)
 ## - instantiate that scene in whichever way you prefer,
 ##   access it from the script that needs to spawn a one-shot SFX
 ##   and call spawn_sfx
