@@ -24,15 +24,14 @@ func test_vertical_axis_value_to_cardinal_direction_assert_negative_gives_up():
 func test_vertical_axis_value_to_cardinal_direction_assert_positive_gives_down():
 	assert_eq(MathUtils.vertical_axis_value_to_cardinal_direction(1.0), MathEnums.CardinalDirection.DOWN)
 
-func test_cardinal_direction_to_vector2i_assert_left_gives_vector_left():
-	assert_eq(MathUtils.cardinal_direction_to_vector2i(MathEnums.CardinalDirection.LEFT), Vector2i.LEFT)
+func test_cardinal_direction_to_unit_vector2i_assert_left_gives_vector_left():
+	assert_eq(MathUtils.cardinal_direction_to_unit_vector2i(MathEnums.CardinalDirection.LEFT), Vector2i.LEFT)
 
-func test_cardinal_direction_to_vector2i_assert_right_gives_vector_right():
-	assert_eq(MathUtils.cardinal_direction_to_vector2i(MathEnums.CardinalDirection.RIGHT), Vector2i.RIGHT)
+func test_cardinal_direction_to_unit_vector2i_assert_right_gives_vector_right():
+	assert_eq(MathUtils.cardinal_direction_to_unit_vector2i(MathEnums.CardinalDirection.RIGHT), Vector2i.RIGHT)
 
-func test_cardinal_direction_to_vector2i_assert_up_gives_vector_up():
-	assert_eq(MathUtils.cardinal_direction_to_vector2i(MathEnums.CardinalDirection.UP), Vector2i.UP)
+func test_cardinal_direction_to_unit_vector2i_assert_up_gives_vector_up():
+	assert_eq(MathUtils.cardinal_direction_to_unit_vector2i(MathEnums.CardinalDirection.UP), Vector2i.UP)
 
-func test_cardinal_direction_to_vector2i_assert_down_gives_vector_down():
-	assert_eq(MathUtils.cardinal_direction_to_vector2i(MathEnums.CardinalDirection.DOWN), Vector2i.DOWN)
-
+func test_cardinal_direction_to_unit_vector2i_assert_down_gives_vector_down():
+	assert_eq(MathUtils.cardinal_direction_to_unit_vector2i(MathEnums.CardinalDirection.DOWN), Vector2i.DOWN)

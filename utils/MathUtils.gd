@@ -39,7 +39,7 @@ static func vertical_axis_value_to_cardinal_direction(value: float) -> MathEnums
 
 
 ## Return Vector2i corresponding to cardinal direction
-static func cardinal_direction_to_vector2i(cardinal_direction: MathEnums.CardinalDirection) -> Vector2i:
+static func cardinal_direction_to_unit_vector2i(cardinal_direction: MathEnums.CardinalDirection) -> Vector2i:
 	match cardinal_direction:
 		MathEnums.CardinalDirection.LEFT:
 			return Vector2i(-1, 0)
@@ -50,6 +50,6 @@ static func cardinal_direction_to_vector2i(cardinal_direction: MathEnums.Cardina
 		MathEnums.CardinalDirection.DOWN:
 			return Vector2i(0, 1)
 		_:
-			push_error("[MathUtils] cardinal_direction_to_vector2i: invalid cardinal_direction %d" %
+			push_error("[MathUtils] cardinal_direction_to_unit_vector2i: invalid cardinal_direction %d" %
 				cardinal_direction)
 			return Vector2i.ZERO

@@ -67,7 +67,7 @@ Improvement suggestions and bug reports are welcome in the [Issues](https://gith
     - `is_cardinal_direction_horizontal`: Return true if passed cardinal direction is horizontal, false if vertical
     - `horizontal_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero horizontal axis value
     - `vertical_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero vertical axis value
-    - `cardinal_direction_to_vector2i`: Return Vector2i corresponding to cardinal direction
+    - `cardinal_direction_to_unit_vector2i`: Return unit Vector2i corresponding to cardinal direction
 
 - [NodeUtils](utils/NodeUtils.gd)
     - `queue_free_children`: Call queue free on all children of node
