@@ -1,11 +1,5 @@
 class_name MathUtils
-## Util static functions for math/geometry and random operations
-
-
-## Return a random float in [0; 1)
-static func exclusive_randf() -> float:
-		# up to 15 decimals under zero, 0.999... is not 1.0 yet
-		return min(randf(), 0.999999999999999)
+## Util static functions for math & geometry
 
 
 ## Return true if passed cardinal direction is horizontal, false if vertical
