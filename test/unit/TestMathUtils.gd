@@ -36,6 +36,18 @@ func test_cardinal_direction_to_unit_vector2i_assert_up_gives_vector_up():
 func test_cardinal_direction_to_unit_vector2i_assert_down_gives_vector_down():
 	assert_eq(MathUtils.cardinal_direction_to_unit_vector2i(MathEnums.CardinalDirection.DOWN), Vector2i.DOWN)
 
+func test_cardinal_direction_to_angle_assert_left_gives_pi():
+	assert_almost_eq(MathUtils.cardinal_direction_to_angle(MathEnums.CardinalDirection.LEFT), PI, 1e-7)
+
+func test_cardinal_direction_to_angle_assert_right_gives_0():
+	assert_eq(MathUtils.cardinal_direction_to_angle(MathEnums.CardinalDirection.RIGHT), 0.0)
+
+func test_cardinal_direction_to_angle_assert_up_gives_vector_minus_pi_on_2():
+	assert_almost_eq(MathUtils.cardinal_direction_to_angle(MathEnums.CardinalDirection.UP), - PI / 2.0, 1e-7)
+
+func test_cardinal_direction_to_angle_assert_down_gives_vector_pi_on_2():
+	assert_almost_eq(MathUtils.cardinal_direction_to_angle(MathEnums.CardinalDirection.DOWN), PI / 2.0, 1e-7)
+
 func test_vector2i_to_dominant_cardinal_direction_assert_vector_left_gives_left():
 	assert_eq(MathUtils.vector2i_to_dominant_cardinal_direction(Vector2i.LEFT), MathEnums.CardinalDirection.LEFT)
 
