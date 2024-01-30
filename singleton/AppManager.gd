@@ -26,8 +26,8 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 ## (Optional) Canvas Layer showing debug info
 @export var debug_overlay: CanvasLayer
 
-## If true, auto-switch to fullscreen on standalone game start
-@export var auto_fullscreen_in_standalone: bool = false
+## If true, auto-switch to fullscreen on PC template (standalone) game start
+@export var auto_fullscreen_in_pc_template: bool = false
 
 ## Array of resolution presets
 @export var preset_resolutions: Array[Vector2i] = [
@@ -53,8 +53,8 @@ func _ready():
 
 	if DisplayServer.window_get_mode() not in \
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN] and \
-			auto_fullscreen_in_standalone:
-		if OS.has_feature("standalone"):
+			auto_fullscreen_in_pc_template:
+		if OS.has_feature("pc") and OS.has_feature("template"):
 			print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
 			call_deferred(&"toggle_fullscreen")
 
