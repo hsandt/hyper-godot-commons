@@ -75,7 +75,7 @@ func _unhandled_input(event: InputEvent):
 
 	if event.is_action_pressed(&"app_toggle_fullscreen"):
 		toggle_fullscreen()
-	if event.is_action_pressed(&"app_toggle_debug_overlay"):
+	if event.is_action_pressed(&"app_toggle_debug_overlay") and debug_overlay:
 		toggle_debug_overlay()
 
 	if event.is_action_pressed(&"app_take_screenshot"):
