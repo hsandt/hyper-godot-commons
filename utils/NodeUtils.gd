@@ -21,3 +21,11 @@ static func instantiate_under_at(packed_scene: PackedScene, parent: Node, global
 	parent.add_child(instance)
 	instance.global_position = global_position
 	return instance
+
+
+## Instantiate a packed scene under a parent at a global position at end of current frame
+static func instantiate_under_at_deferred(packed_scene: PackedScene, parent: Node, global_position: Vector2) -> Node:
+	var instance := packed_scene.instantiate()
+	parent.add_child.call_deferred(instance)
+	instance.global_position = global_position
+	return instance
