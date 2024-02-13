@@ -2,6 +2,19 @@ class_name MathUtils
 ## Util static functions for math & geometry
 
 
+## Return Vector2i corresponding to horizontal direction
+static func horizontal_direction_to_unit_vector2i(horizontal_direction: MathEnums.HorizontalDirection) -> Vector2i:
+	match horizontal_direction:
+		MathEnums.HorizontalDirection.LEFT:
+			return Vector2i.LEFT
+		MathEnums.HorizontalDirection.RIGHT:
+			return Vector2i.RIGHT
+		_:
+			push_error("[MathUtils] horizontal_direction_to_unit_vector2i: invalid horizontal_direction %d" %
+				horizontal_direction)
+			return Vector2i.ZERO
+
+
 ## Return true if passed cardinal direction is horizontal, false if vertical
 static func is_cardinal_direction_horizontal(cardinal_direction: MathEnums.CardinalDirection) -> bool:
 	# To avoid relying on enum exact order, we do not check cardinal_direction as int % 2
