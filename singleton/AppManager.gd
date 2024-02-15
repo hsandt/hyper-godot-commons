@@ -56,7 +56,7 @@ func _ready():
 			auto_fullscreen_in_pc_template:
 		if OS.has_feature("pc") and OS.has_feature("template"):
 			print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
-			call_deferred(&"toggle_fullscreen")
+			toggle_fullscreen.call_deferred()
 
 	if debug_overlay != null:
 		# Show FPS by default in editor/debug exports. Else, wait for user to toggle it.
