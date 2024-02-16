@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2tmggusmmt18"]
+
+[ext_resource type="Script" path="res://addons/hyper-godot-commons/singleton/SceneManager.gd" id="1_u5kb3"]
+
+[node name="SceneManager" type="Node"]
+process_mode = 3
+script = ExtResource("1_u5kb3")
