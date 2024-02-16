@@ -68,21 +68,20 @@ func _ready():
 func _unhandled_input(event: InputEvent):
 	# let user toggle hi-dpi resolution freely
 	# (hi-dpi is hard to detect and resize is hard to force on start)
-	if InputMap.has_action(&"app_prev_resolution") and event.is_action_pressed(&"app_prev_resolution"):
+	if _is_action_pressed_in_event_safe(event, &"app_prev_resolution"):
 		change_resolution(-1)
-	elif InputMap.has_action(&"app_next_resolution") and event.is_action_pressed(&"app_next_resolution"):
+	elif _is_action_pressed_in_event_safe(event, &"app_next_resolution"):
 		change_resolution(1)
 
-	if  InputMap.has_action(&"app_toggle_fullscreen") and event.is_action_pressed(&"app_toggle_fullscreen"):
+	if _is_action_pressed_in_event_safe(event, &"app_toggle_fullscreen"):
 		toggle_fullscreen()
-	if  InputMap.has_action(&"app_toggle_debug_overlay") and event.is_action_pressed(&"app_toggle_debug_overlay") and \
-			debug_overlay:
+	if _is_action_pressed_in_event_safe(event, &"app_toggle_debug_overlay") and debug_overlay:
 		toggle_debug_overlay()
 
-	if  InputMap.has_action(&"app_take_screenshot") and event.is_action_pressed(&"app_take_screenshot"):
+	if _is_action_pressed_in_event_safe(event, &"app_take_screenshot"):
 		take_screenshot()
 
-	if  InputMap.has_action(&"app_exit") and event.is_action_pressed(&"app_exit"):
+	if _is_action_pressed_in_event_safe(event, &"app_exit"):
 		get_tree().quit()
 
 
@@ -188,3 +187,7 @@ func save_screenshot_in(screenshot_filepath: String):
 			" with error code: ", err)
 	else:
 		print("[AppManager] Saved screenshot in %s" % screenshot_filepath)
+
+
+func _is_action_pressed_in_event_safe(event: InputEvent, action: StringName):
+	return InputMap.has_action(action) and event.is_action_pressed(action)
