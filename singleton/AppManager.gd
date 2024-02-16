@@ -68,20 +68,21 @@ func _ready():
 func _unhandled_input(event: InputEvent):
 	# let user toggle hi-dpi resolution freely
 	# (hi-dpi is hard to detect and resize is hard to force on start)
-	if event.is_action_pressed(&"app_prev_resolution"):
+	if InputMap.has_action(&"app_prev_resolution") and event.is_action_pressed(&"app_prev_resolution"):
 		change_resolution(-1)
-	elif event.is_action_pressed(&"app_next_resolution"):
+	elif InputMap.has_action(&"app_next_resolution") and event.is_action_pressed(&"app_next_resolution"):
 		change_resolution(1)
 
-	if event.is_action_pressed(&"app_toggle_fullscreen"):
+	if  InputMap.has_action(&"app_toggle_fullscreen") and event.is_action_pressed(&"app_toggle_fullscreen"):
 		toggle_fullscreen()
-	if event.is_action_pressed(&"app_toggle_debug_overlay") and debug_overlay:
+	if  InputMap.has_action(&"app_toggle_debug_overlay") and event.is_action_pressed(&"app_toggle_debug_overlay") and \
+			debug_overlay:
 		toggle_debug_overlay()
 
-	if event.is_action_pressed(&"app_take_screenshot"):
+	if  InputMap.has_action(&"app_take_screenshot") and event.is_action_pressed(&"app_take_screenshot"):
 		take_screenshot()
 
-	if event.is_action_pressed(&"app_exit"):
+	if  InputMap.has_action(&"app_exit") and event.is_action_pressed(&"app_exit"):
 		get_tree().quit()
 
 
