@@ -6,6 +6,8 @@ extends AudioStreamPlayer
 ## Usage:
 ## - create scene OneShotAudioStreamPlayer.tscn with one node with this script
 ##   (the easiest is to copy OneShotAudioStreamPlayerTemplate.tscn)
+## - customize OneShotAudioStreamPlayer.tscn, in particular the Bus
+##   to match the type of SFX to play on this instance
 ## - instantiate that scene at runtime and call play_audio_stream on it
 ##   (the easiest is to use the provided SFXManager)
 

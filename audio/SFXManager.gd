@@ -6,6 +6,10 @@ extends Node
 ## - create scene SFXManager.tscn with one node with this script
 ##   (the easiest is to copy SFXManagerTemplate.tscn, which has
 ##   an SFXParent setup as child)
+## - customize SFXManager.tscn to project needs
+##   (pay attention to its One Shot Audio Stream Player Prefab,
+##   which you may want to replace with a custom copy of the provided template,
+##   see OneShotAudioStreamPlayer.gd documentation)
 ## - instantiate that scene in whichever way you prefer,
 ##   access it from the script that needs to spawn a one-shot SFX
 ##   and call spawn_sfx
@@ -13,6 +17,9 @@ extends Node
 ##   in any scene that needs it and flag it with Access as Unique Name,
 ##   but you can also instantiate the SFXManager at runtime automatically
 ##   on game start or when you enter a new scene)
+## Note: this is not a Singleton because you may need multiple SFXManager
+##   for each type of SFX (ingame, menu, etc.), each with a different
+##   One Shot Audio Stream Player Prefab with its own Bus.
 
 
 ## Prefab of OneShotAudioStreamPlayer used to play SFX
