@@ -21,6 +21,7 @@ static func instantiate_under(packed_scene: PackedScene, parent: Node) -> Node:
 static func instantiate_under_at(packed_scene: PackedScene, parent: Node, global_position: Vector2) -> Node:
 	var instance := packed_scene.instantiate()
 	parent.add_child(instance, OS.has_feature("debug"))
+	instance.global_position = global_position
 	return instance
 
 
