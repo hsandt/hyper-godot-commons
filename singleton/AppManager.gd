@@ -98,11 +98,18 @@ func _physics_process(_delta):
 	current_frame += 1
 
 
-func set_window_scale(scale: int):
+func set_window_scale(scale: float):
 	var native_width: int = ProjectSettings.get_setting("display/window/size/viewport_width")
 	var native_height: int = ProjectSettings.get_setting("display/window/size/viewport_height")
-	var scaled_window_size := Vector2i(scale * native_width, scale * native_height)
+	var native_window_size := Vector2i(native_width,native_height)
+	# Note that Vector2i(Vector2) truncates fractional part
+	var scaled_window_size := Vector2i(scale * Vector2i(native_width, native_height))
 	DisplayServer.window_set_size(scaled_window_size)
+
+	# Since window_set_size keeps top-left and we want to preserve recenter, adjust position by subtracting
+	# half of the window size delta (if scaling down, window_size_delta has negative components, but this also works)
+	var window_size_delta := scaled_window_size - native_window_size
+	DisplayServer.window_set_position.call_deferred(DisplayServer.window_get_position() - Vector2i(window_size_delta / 2.0))
 
 
 func change_resolution(delta: int):
