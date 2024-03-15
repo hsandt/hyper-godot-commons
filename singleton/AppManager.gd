@@ -26,7 +26,15 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 ## (Optional) Canvas Layer showing debug info
 @export var debug_overlay: CanvasLayer
 
+## Scale the window on start by this factor
+## This replaces display/window/stretch/scale for projects when it causes issues
+## (e.g. gives unwanted HUD anchors in editor or offsets HUD elements at runtime,
+## as in https://github.com/godotengine/godot-proposals/issues/9307)
+## Note: if auto_fullscreen_in_pc_template is true, it takes precedence on PC template
+@export var auto_scale: float = 1.0
+
 ## If true, auto-switch to fullscreen on PC template (standalone) game start
+## Note: it takes precedence over auto_scale on PC template
 @export var auto_fullscreen_in_pc_template: bool = false
 
 ## Array of resolution presets
@@ -53,10 +61,11 @@ func _ready():
 
 	if DisplayServer.window_get_mode() not in \
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN] and \
-			auto_fullscreen_in_pc_template:
-		if OS.has_feature("pc") and OS.has_feature("template"):
-			print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
-			toggle_fullscreen.call_deferred()
+			auto_fullscreen_in_pc_template and OS.has_feature("pc") and OS.has_feature("template"):
+		print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
+		toggle_fullscreen.call_deferred()
+	elif auto_scale != 1.0:
+		set_window_scale(auto_scale)
 
 	if debug_overlay != null:
 		# Show FPS by default in editor/debug exports. Else, wait for user to toggle it.
@@ -89,12 +98,19 @@ func _physics_process(_delta):
 	current_frame += 1
 
 
+func set_window_scale(scale: int):
+	var native_width: int = ProjectSettings.get_setting("display/window/size/viewport_width")
+	var native_height: int = ProjectSettings.get_setting("display/window/size/viewport_height")
+	var scaled_window_size := Vector2i(scale * native_width, scale * native_height)
+	DisplayServer.window_set_size(scaled_window_size)
+
+
 func change_resolution(delta: int):
 	# Redo this every time in case user changed monitor during game (rare)
 	var screen_size = DisplayServer.screen_get_size()
 
 	# Filter out preset resolutions bigger than screen size
-	var valid_preset_resolutions = []
+	var valid_preset_resolutions: Array[Vector2i] = []
 	for preset_resolution in preset_resolutions:
 		if preset_resolution.x <= screen_size.x and \
 				preset_resolution.y <= screen_size.y:
@@ -105,7 +121,7 @@ func change_resolution(delta: int):
 			"bigger than screen size, STOP")
 		return
 
-	var new_preset_resolution_index
+	var new_preset_resolution_index: int
 	if current_preset_resolution_index == -1:
 		if delta > 0:
 			new_preset_resolution_index = 0
@@ -120,10 +136,11 @@ func change_resolution(delta: int):
 
 	current_preset_resolution_index = new_preset_resolution_index
 
-	var new_preset_resolution = valid_preset_resolutions[new_preset_resolution_index]
+	var new_preset_resolution := valid_preset_resolutions[new_preset_resolution_index]
 	DisplayServer.window_set_size(new_preset_resolution)
 
 	print("[AppManager] Changed to preset resolution: %s" % new_preset_resolution)
+
 
 func toggle_fullscreen():
 	var new_window_mode: DisplayServer.WindowMode
