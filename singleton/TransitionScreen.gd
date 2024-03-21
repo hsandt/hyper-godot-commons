@@ -3,7 +3,9 @@ extends CanvasLayer
 ##
 ## Usage:
 ## - create scene TransitionScreen.tscn and register it as autoload singleton scene
-##   (the easiest is to copy TransitionScreenTemplate.tscn)
+##   (the easiest is to copy TransitionScreenTemplate.tscn, and also re-save the associated
+##   animation library transition_screen_template_animation_library.tres as
+##   some custom res in the same game project folder to avoid resource sharing)
 
 
 @export var animation_player: AnimationPlayer
