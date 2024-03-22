@@ -1,5 +1,5 @@
-class_name AnimatedSprite2DBrightnessController
-extends AnimatedSprite2D
+class_name CanvasItemWithPropertiesController
+extends CanvasItem
 ## This script allows us to set shader parameters "brightness" and native modulate
 ## on the animated sprite material, which should use the shader custom_sprite_shader.gdshader.
 
