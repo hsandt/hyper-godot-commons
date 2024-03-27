@@ -23,8 +23,14 @@ extends Node
 ## Emitted when fullscreen is toggled via AppManager shortcuts
 signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 
+
+@export_group("Components")
+
 ## (Optional) Canvas Layer showing debug info
 @export var debug_overlay: CanvasLayer
+
+
+@export_group("Parameters")
 
 ## Scale the window on start by this factor
 ## This replaces display/window/stretch/scale for projects when it causes issues
@@ -44,6 +50,10 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 		Vector2i(2560, 1440),
 		Vector2i(3840, 2160),
 	]
+
+## (Debug only) If true, show the debug overlay on start, else hide it
+@export var debug_show_debug_overlay_on_start: bool = false
+
 
 ## Current index of resolution among array of presets
 var current_preset_resolution_index = -1
@@ -68,8 +78,9 @@ func _ready():
 		set_window_scale(auto_scale)
 
 	if debug_overlay != null:
-		# Show FPS by default in editor/debug exports. Else, wait for user to toggle it.
-		debug_overlay.visible = OS.has_feature("debug")
+		# Show debug overlay by default only in editor/debug exports, if corresponding flag is true
+		# Else, hide debug overlay until user toggles visibility with debug input
+		debug_overlay.visible = OS.has_feature("debug") and debug_show_debug_overlay_on_start
 
 	current_frame = 0
 
