@@ -229,20 +229,17 @@ func save_screenshot_in(screenshot_filepath: String, scaled: bool):
 	var image = get_viewport().get_texture().get_image()
 
 	if ProjectSettings.get_setting("display/window/stretch/mode") != "disabled":
-		if scaled:
-			# We want screenshot at window size
-			if ProjectSettings.get_setting("display/window/stretch/mode") == "viewport":
-				# In viewport stretch mode, texture is always at native dimensions, so resize to window size
-				var scaled_window_size := DisplayServer.window_get_size()
-				image.resize(scaled_window_size.x, scaled_window_size.y, Image.INTERPOLATE_NEAREST)
-			# In canvas_items stretch mode, texture is already at window size
-		else:
-			# We want screenshot at native size
-			if ProjectSettings.get_setting("display/window/stretch/mode") == "canvas_items":
-				# In canvas_items stretch mode, texture is always at scaled dimensions, so resize to native size
-				var native_window_size := get_native_window_size()
-				image.resize(native_window_size.x, native_window_size.y, Image.INTERPOLATE_NEAREST)
-			# In viewport stretch mode, texture is already at native size
+		var target_screenshot_size := DisplayServer.window_get_size() if scaled else get_native_window_size()
+
+		# If needed, resize screenshot to target size
+		# In practice, this happens when:
+		# - stretch mode is "viewport" and we want scaled screenshot (scale up)
+		# - stretch mode is "canvas_items" and we want native screenshot (scale down)
+		# While scale down sounds scarier, it turns out that it pixel-perfectly placed sprites
+		# are perfectly scaled back to their native resolution, and sprites with fractional
+		# pixel offsets are simply snapped to the closest pixel as if playing in "viewport" stretch mode
+		if target_screenshot_size != image.get_size():
+			image.resize(target_screenshot_size.x, target_screenshot_size.y, Image.INTERPOLATE_NEAREST)
 
 	# Else, when "display/window/stretch/mode" is "disabled", no stretching occurs
 	# so the screenshot is at native resolution but scaled window size
