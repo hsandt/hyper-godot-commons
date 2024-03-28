@@ -15,7 +15,8 @@ extends Node
 ##                                          Alt+Enter (Linux/Windows style),
 ##                                          Ctrl+Meta+F (macOS style)
 ##     app_toggle_debug_overlay
-##     app_take_screenshot
+##     app_take_screenshot_native
+##     app_take_screenshot_scaled
 ##     app_exit - recommended: Ctrl+Q (Linux/Windows style),
 ##                             Meta+Q (macOS style)
 
@@ -98,8 +99,10 @@ func _unhandled_input(event: InputEvent):
 	if _is_action_pressed_in_event_safe(event, &"app_toggle_debug_overlay") and debug_overlay:
 		toggle_debug_overlay()
 
-	if _is_action_pressed_in_event_safe(event, &"app_take_screenshot"):
-		take_screenshot()
+	if _is_action_pressed_in_event_safe(event, &"app_take_screenshot_native"):
+		take_screenshot(false)
+	elif _is_action_pressed_in_event_safe(event, &"app_take_screenshot_scaled"):
+		take_screenshot(true)
 
 	if _is_action_pressed_in_event_safe(event, &"app_exit"):
 		get_tree().quit()
@@ -109,12 +112,17 @@ func _physics_process(_delta):
 	current_frame += 1
 
 
+func get_native_window_size() -> Vector2i:
+	return Vector2i(
+		ProjectSettings.get_setting("display/window/size/viewport_width"),
+		ProjectSettings.get_setting("display/window/size/viewport_height")
+	)
+
+
 func set_window_scale(scale: float):
-	var native_width: int = ProjectSettings.get_setting("display/window/size/viewport_width")
-	var native_height: int = ProjectSettings.get_setting("display/window/size/viewport_height")
-	var native_window_size := Vector2i(native_width,native_height)
+	var native_window_size := get_native_window_size()
 	# Note that Vector2i(Vector2) truncates fractional part
-	var scaled_window_size := Vector2i(scale * Vector2i(native_width, native_height))
+	var scaled_window_size := Vector2i(scale * native_window_size)
 	DisplayServer.window_set_size(scaled_window_size)
 
 	# Since window_set_size keeps top-left and we want to preserve recenter, adjust position by subtracting
@@ -184,7 +192,10 @@ func toggle_debug_overlay():
 	print("[AppManager] Toggle debug canvas layer: %s" % new_value)
 
 
-func take_screenshot():
+## Take a screenshot and save it in user path
+## If scaled is true, use the current window scale
+## Else, use the native resolution
+func take_screenshot(scaled: bool):
 	var datetime = Time.get_datetime_dict_from_system()
 
 	# Make sure all numbers less than 10 are padded with a leading 0 so
@@ -209,13 +220,34 @@ func take_screenshot():
 			push_error("[AppManager] Failed to make directory user://Screenshots with error code: ", err)
 			return
 
-	save_screenshot_in(screenshot_filepath)
+	save_screenshot_in(screenshot_filepath, scaled)
 
 
-func save_screenshot_in(screenshot_filepath: String):
+func save_screenshot_in(screenshot_filepath: String, scaled: bool):
 	# Get image data from viewport texture (in Godot 4, this is already ready to use,
 	# no need to flip_y)
 	var image = get_viewport().get_texture().get_image()
+
+	if ProjectSettings.get_setting("display/window/stretch/mode") != "disabled":
+		if scaled:
+			# We want screenshot at window size
+			if ProjectSettings.get_setting("display/window/stretch/mode") == "viewport":
+				# In viewport stretch mode, texture is always at native dimensions, so resize to window size
+				var scaled_window_size := DisplayServer.window_get_size()
+				image.resize(scaled_window_size.x, scaled_window_size.y, Image.INTERPOLATE_NEAREST)
+			# In canvas_items stretch mode, texture is already at window size
+		else:
+			# We want screenshot at native size
+			if ProjectSettings.get_setting("display/window/stretch/mode") == "canvas_items":
+				# In canvas_items stretch mode, texture is always at scaled dimensions, so resize to native size
+				var native_window_size := get_native_window_size()
+				image.resize(native_window_size.x, native_window_size.y, Image.INTERPOLATE_NEAREST)
+			# In viewport stretch mode, texture is already at native size
+
+	# Else, when "display/window/stretch/mode" is "disabled", no stretching occurs
+	# so the screenshot is at native resolution but scaled window size
+	# and there is nothing meaningful to honor the scaled flag
+
 	var err = image.save_png(screenshot_filepath)
 	if err:
 		push_error("[AppManager] Failed to save screenshot in: ", screenshot_filepath,
