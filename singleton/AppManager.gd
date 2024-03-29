@@ -15,8 +15,8 @@ extends Node
 ##                                          Alt+Enter (Linux/Windows style),
 ##                                          Ctrl+Meta+F (macOS style)
 ##     app_toggle_debug_overlay
-##     app_take_screenshot_native
-##     app_take_screenshot_scaled
+##     app_take_screenshot_scaled - recommended: F12 (Steam style)
+##     app_take_screenshot_native - recommended: Shift+F12
 ##     app_exit - recommended: Ctrl+Q (Linux/Windows style),
 ##                             Meta+Q (macOS style)
 
@@ -250,7 +250,7 @@ func save_screenshot_in(screenshot_filepath: String, scaled: bool):
 		push_error("[AppManager] Failed to save screenshot in: ", screenshot_filepath,
 			" with error code: ", err)
 	else:
-		print("[AppManager] Saved screenshot in %s" % screenshot_filepath)
+		print("[AppManager] Saved %s screenshot in %s" % ["scaled" if scaled else "native", screenshot_filepath])
 
 
 func _is_action_pressed_in_event_safe(event: InputEvent, action: StringName):
