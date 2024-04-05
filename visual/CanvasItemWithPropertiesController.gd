@@ -2,6 +2,8 @@ class_name CanvasItemWithPropertiesController
 extends CanvasItem
 ## This script allows us to set shader parameters "brightness" and native modulate
 ## on the animated sprite material, which should use the shader custom_sprite_shader.gdshader.
+## Each entity should have its own material instance, see shader_material doc comment for more
+## details.
 
 
 ## When true, update material brightness to match state variable every frame
