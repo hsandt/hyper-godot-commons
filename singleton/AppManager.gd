@@ -247,6 +247,11 @@ func toggle_fullscreen():
 
 	DisplayServer.window_set_mode(new_window_mode)
 
+	# When leaving fullscreen, force reset scale to last window scale to fix
+	# Window manager slightly modifying window size after each double toggle fullscreen
+	# Do not do this when *entering* fullscreen, this would add an extra lag
+	if new_window_mode == DisplayServer.WINDOW_MODE_WINDOWED:
+		set_window_scale_preset_index(current_window_scale_preset_index, true)
 
 	fullscreen_toggled.emit(new_window_mode)
 
