@@ -74,7 +74,7 @@ var cached_screen_usable_rect_size: Vector2i
 var cached_valid_window_scale_presets: Array[float]
 
 ## Current index of window scale among array of presets
-var current_window_scale_preset_index = -1
+var current_window_scale_preset_index: int
 
 ## Current frame counter
 var current_frame: int
@@ -99,7 +99,8 @@ func _ready():
 		print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
 		toggle_fullscreen.call_deferred()
 	else:
-		set_window_scale_preset_index(initial_window_scale_preset_index)
+		# Force update: true for initial window scale
+		set_window_scale_preset_index(initial_window_scale_preset_index, true)
 
 	if debug_overlay != null:
 		# Show debug overlay by default only in editor/debug exports, if corresponding flag is true
@@ -208,21 +209,17 @@ func set_window_scale(scale: float):
 
 
 func change_resolution(delta: int):
-	var new_preset_window_scale_index: int
-	if current_window_scale_preset_index == -1:
-		if delta > 0:
-			new_preset_window_scale_index = 0
-		else:
-			new_preset_window_scale_index = cached_valid_window_scale_presets.size() - 1
-	else:
-		new_preset_window_scale_index = (current_window_scale_preset_index + delta) % \
+	var new_preset_window_scale_index := (current_window_scale_preset_index + delta) % \
 			cached_valid_window_scale_presets.size()
 
-	set_window_scale_preset_index(new_preset_window_scale_index)
+	set_window_scale_preset_index(new_preset_window_scale_index, false)
 
 
-func set_window_scale_preset_index(new_preset_window_scale_index: int):
-	if current_window_scale_preset_index == new_preset_window_scale_index:
+## Set window scale preset index and update window scale according to preset array
+## If force_update is true, do this even if the index didn't change
+## This is useful on initialization and when leaving fullscreen
+func set_window_scale_preset_index(new_preset_window_scale_index: int, force_update: bool):
+	if not force_update and current_window_scale_preset_index == new_preset_window_scale_index:
 		return
 
 	current_window_scale_preset_index = new_preset_window_scale_index
@@ -230,7 +227,7 @@ func set_window_scale_preset_index(new_preset_window_scale_index: int):
 	if new_preset_window_scale_index < cached_valid_window_scale_presets.size():
 		var new_preset_window_scale := cached_valid_window_scale_presets[new_preset_window_scale_index]
 		set_window_scale(new_preset_window_scale)
-		print("[AppManager] set_window_scale_preset_index: changed to preset window scale: %f" % new_preset_window_scale)
+		print("[AppManager] Set window scale to: %0.2f" % new_preset_window_scale)
 	else:
 		push_error("[AppManager] set_window_scale_preset_index: invalid preset index %d, " % new_preset_window_scale_index,
 			"expected 0 <= index < %d" % cached_valid_window_scale_presets.size())
@@ -249,6 +246,7 @@ func toggle_fullscreen():
 		print("[AppManager] Toggle fullscreen: WINDOW_MODE_WINDOWED")
 
 	DisplayServer.window_set_mode(new_window_mode)
+
 
 	fullscreen_toggled.emit(new_window_mode)
 
