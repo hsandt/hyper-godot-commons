@@ -33,31 +33,48 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 
 @export_group("Parameters")
 
-## Scale the window on start by this factor
+## Array of scale presets
+@export var window_scale_presets: Array[float] = [
+		1.0,
+		2.0,
+		3.0,
+		4.0,
+	]
+
+## Index of window scale preset to use on game start, among window_scale_presets
 ## This replaces display/window/stretch/scale for projects when it causes issues
 ## (e.g. gives unwanted HUD anchors in editor or offsets HUD elements at runtime,
 ## as in https://github.com/godotengine/godot-proposals/issues/9307)
-## Note: if auto_fullscreen_in_pc_template is true, it takes precedence on PC template
-@export var auto_scale: float = 1.0
+## Note: if auto_fullscreen_in_pc_template is true,
+## auto_fullscreen_in_pc_template takes precedence on PC template
+@export var initial_window_scale_preset_index: int = 0
 
 ## If true, auto-switch to fullscreen on PC template (standalone) game start
 ## Note: it takes precedence over auto_scale on PC template
 @export var auto_fullscreen_in_pc_template: bool = false
 
-## Array of resolution presets
-@export var preset_resolutions: Array[Vector2i] = [
-		Vector2i(1280, 720),
-		Vector2i(1920, 1080),
-		Vector2i(2560, 1440),
-		Vector2i(3840, 2160),
-	]
-
 ## (Debug only) If true, show the debug overlay on start, else hide it
 @export var debug_show_debug_overlay_on_start: bool = false
 
 
-## Current index of resolution among array of presets
-var current_preset_resolution_index = -1
+## Computed constant additional size provided by window decorations, used to compute
+## hypothetical window size with decorations for different window sizes
+var computed_window_decorations_additional_size: Vector2i
+
+## Dynamically cached screen usable rect size, used to detect when changing monitor screen size,
+## desktop taskbar or top menu bar
+var cached_screen_usable_rect_size: Vector2i
+
+## Dynamically cached array of valid window scale presets, i.e. scale presets for which
+## the resulting window size with decorations is not bigger than the screen
+## usable rect size (see method is_window_size_valid)
+## This means that a scale that corresponds to fullscreen size will not be valid
+## due to window title bar (and possibly OS taskbar and top menu bar reducing
+## usable rect).
+var cached_valid_window_scale_presets: Array[float]
+
+## Current index of window scale among array of presets
+var current_window_scale_preset_index = -1
 
 ## Current frame counter
 var current_frame: int
@@ -70,13 +87,19 @@ func _ready():
 	process_priority = -100
 	process_physics_priority = -100
 
+	# Initialize computed constants and dynamically cached variables
+	computed_window_decorations_additional_size = DisplayServer.window_get_size_with_decorations() \
+		- DisplayServer.window_get_size()
+	cached_screen_usable_rect_size = DisplayServer.screen_get_usable_rect().size
+	update_cached_valid_window_scale_presets()
+
 	if DisplayServer.window_get_mode() not in \
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN] and \
 			auto_fullscreen_in_pc_template and OS.has_feature("pc") and OS.has_feature("template"):
 		print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
 		toggle_fullscreen.call_deferred()
-	elif auto_scale != 1.0:
-		set_window_scale(auto_scale)
+	else:
+		set_window_scale_preset_index(initial_window_scale_preset_index)
 
 	if debug_overlay != null:
 		# Show debug overlay by default only in editor/debug exports, if corresponding flag is true
@@ -108,8 +131,45 @@ func _unhandled_input(event: InputEvent):
 		get_tree().quit()
 
 
-func _physics_process(_delta):
+func _physics_process(_delta: float):
 	current_frame += 1
+
+
+func _process(_delta: float):
+	# There is no signal for Screen usable rect change, so we must check it manually
+	# (this can happen when hiding taskbar or changing monitor display)
+	var screen_usable_rect_size := DisplayServer.screen_get_usable_rect().size
+	if cached_screen_usable_rect_size != screen_usable_rect_size:
+		cached_screen_usable_rect_size = screen_usable_rect_size
+		update_cached_valid_window_scale_presets()
+
+
+func update_cached_valid_window_scale_presets():
+	cached_valid_window_scale_presets.clear()
+
+	# Get native window size (should be stable)
+	var native_window_size := get_native_window_size()
+
+	# Filter out preset window scales that lead to a window size with decorations
+	# bigger than screen size in any dimension
+	for preset_window_scale in window_scale_presets:
+		# Note that Vector2i(Vector2) truncates fractional part
+		var scaled_window_size := Vector2i(preset_window_scale * native_window_size)
+		if is_window_size_valid(scaled_window_size):
+			cached_valid_window_scale_presets.append(preset_window_scale)
+
+	if cached_valid_window_scale_presets.is_empty():
+		push_warning("[AppManager] update_cached_valid_window_scale_presets: all preset window scales ",
+			"lead to window with decorations bigger than screen usable rect size, ",
+			"so cached_valid_window_scale_presets is empty")
+
+
+## Return true if window with passed size could fit in screen usable rect
+## This does not apply to fullscreen, which doesn't care about usable rect
+func is_window_size_valid(window_size: Vector2i):
+	var window_size_with_decorations := window_size + computed_window_decorations_additional_size
+	return window_size_with_decorations.x <= cached_screen_usable_rect_size.x and \
+		window_size_with_decorations.y <= cached_screen_usable_rect_size.y
 
 
 func get_native_window_size() -> Vector2i:
@@ -120,52 +180,60 @@ func get_native_window_size() -> Vector2i:
 
 
 func set_window_scale(scale: float):
-	var native_window_size := get_native_window_size()
+	# Set new window size using scale
 	# Note that Vector2i(Vector2) truncates fractional part
-	var scaled_window_size := Vector2i(scale * native_window_size)
-	DisplayServer.window_set_size(scaled_window_size)
+	var new_window_size := Vector2i(scale * get_native_window_size())
+
+	if not is_window_size_valid(new_window_size):
+		push_error("[AppManager] set_window_scale: new_window_size %s + decorations goes over cached_screen_usable_rect_size %s" %
+			[new_window_size, cached_screen_usable_rect_size])
+		return
+
+	# Store window size (without decorations) before change
+	var previous_window_size := DisplayServer.window_get_size()
+
+	DisplayServer.window_set_size(new_window_size)
+
+	# Hack to force window size refresh
+	# See https://github.com/godotengine/godot/issues/89543
+	DisplayServer.window_set_size(DisplayServer.window_get_size() + Vector2i(1,0))
+	DisplayServer.window_set_size(DisplayServer.window_get_size() - Vector2i(1,0))
 
 	# Since window_set_size keeps top-left and we want to preserve recenter, adjust position by subtracting
 	# half of the window size delta (if scaling down, window_size_delta has negative components, but this also works)
-	var window_size_delta := scaled_window_size - native_window_size
-	DisplayServer.window_set_position.call_deferred(DisplayServer.window_get_position() - Vector2i(window_size_delta / 2.0))
+	# Note that new_window_size is without decorations, so we should also subtract previous_window_size
+	# without decorations for a consistent delta
+	var window_size_delta := new_window_size - previous_window_size
+	DisplayServer.window_set_position(DisplayServer.window_get_position() - Vector2i(window_size_delta / 2.0))
 
 
 func change_resolution(delta: int):
-	# Redo this every time in case user changed monitor during game (rare)
-	var screen_size = DisplayServer.screen_get_size()
-
-	# Filter out preset resolutions bigger than screen size
-	var valid_preset_resolutions: Array[Vector2i] = []
-	for preset_resolution in preset_resolutions:
-		if preset_resolution.x <= screen_size.x and \
-				preset_resolution.y <= screen_size.y:
-			valid_preset_resolutions.append(preset_resolution)
-
-	if valid_preset_resolutions.is_empty():
-		push_error("[AppManager] change_resolution: all preset resolutions are ",
-			"bigger than screen size, STOP")
-		return
-
-	var new_preset_resolution_index: int
-	if current_preset_resolution_index == -1:
+	var new_preset_window_scale_index: int
+	if current_window_scale_preset_index == -1:
 		if delta > 0:
-			new_preset_resolution_index = 0
+			new_preset_window_scale_index = 0
 		else:
-			new_preset_resolution_index = valid_preset_resolutions.size() - 1
+			new_preset_window_scale_index = cached_valid_window_scale_presets.size() - 1
 	else:
-		new_preset_resolution_index = (current_preset_resolution_index + delta) % \
-			valid_preset_resolutions.size()
+		new_preset_window_scale_index = (current_window_scale_preset_index + delta) % \
+			cached_valid_window_scale_presets.size()
 
-	if current_preset_resolution_index == new_preset_resolution_index:
+	set_window_scale_preset_index(new_preset_window_scale_index)
+
+
+func set_window_scale_preset_index(new_preset_window_scale_index: int):
+	if current_window_scale_preset_index == new_preset_window_scale_index:
 		return
 
-	current_preset_resolution_index = new_preset_resolution_index
+	current_window_scale_preset_index = new_preset_window_scale_index
 
-	var new_preset_resolution := valid_preset_resolutions[new_preset_resolution_index]
-	DisplayServer.window_set_size(new_preset_resolution)
-
-	print("[AppManager] Changed to preset resolution: %s" % new_preset_resolution)
+	if new_preset_window_scale_index < cached_valid_window_scale_presets.size():
+		var new_preset_window_scale := cached_valid_window_scale_presets[new_preset_window_scale_index]
+		set_window_scale(new_preset_window_scale)
+		print("[AppManager] set_window_scale_preset_index: changed to preset window scale: %f" % new_preset_window_scale)
+	else:
+		push_error("[AppManager] set_window_scale_preset_index: invalid preset index %d, " % new_preset_window_scale_index,
+			"expected 0 <= index < %d" % cached_valid_window_scale_presets.size())
 
 
 func toggle_fullscreen():
