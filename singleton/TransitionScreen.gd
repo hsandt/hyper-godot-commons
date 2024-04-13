@@ -6,6 +6,11 @@ extends CanvasLayer
 ##   (the easiest is to copy TransitionScreenTemplate.tscn, and also re-save the associated
 ##   animation library transition_screen_template_animation_library.tres as
 ##   some custom res in the same game project folder to avoid resource sharing)
+##
+## If you use a custom TransitionScreen, add an AnimationPlayer to it with RESET,
+## fade_in and fade_out animations.
+## We recommend that RESET state corresponds to fade_in end and fade_out start,
+## i.e. the state where the screen fade is not visible at all.
 
 
 @export var animation_player: AnimationPlayer
@@ -62,6 +67,14 @@ func fade_out_async(animation_speed: float = 1.0):
 	visible = true
 
 	_play_fade_out(animation_speed)
+
+	# If using the TransitionScreen template or configuring the custom TransitionScreen
+	# so that RESET state corresponds to fade_in end and fade_out start,
+	# i.e. the state where the screen fade is not visible at all, as recommended,
+	# fade out should start perfectly the first time.
+	# Otherwise, it may glitch one frame showing the fully hidden state (typically a black screen)
+	# due to animation rendering lag, and in this case we need the `advance(0)` hack for safety.
+	animation_player.advance(0)
 
 	# Same remark as fade_in_async
 	await animation_player.animation_finished

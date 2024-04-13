@@ -10,6 +10,7 @@ script = ExtResource("1_hnan5")
 animation_player = NodePath("AnimationPlayer")
 
 [node name="ColorRect" type="ColorRect" parent="."]
+modulate = Color(0, 0, 0, 0)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
