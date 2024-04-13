@@ -198,33 +198,33 @@ func set_window_scale(scale: float):
 			[new_window_size, cached_screen_usable_rect_size])
 		return
 
+	var window := get_window()
 	# Store window top-left position (without decorations) and size (without decorations) before change
-	var previous_window_position := DisplayServer.window_get_position()
-	var previous_window_size := DisplayServer.window_get_size()
+	var previous_window_position := window.position
+	var previous_window_size := window.size
 
-	# Since window_set_size keeps top-left and we want to preserve window center,
+	# Since setting window.size keeps top-left and we want to preserve window center,
 	# predict wanted top-left position with new scale by adding previous window extent (half size)
 	# to get window center, then subtract new window extent to get new window top-left
 	# Note that this method works in all cases, unlike subtracting new_window_size / 2 *after*
-	# window_set_size(), as window_set_size() automatically clamps window position if the window
+	# setting window.size, as setting window.size automatically clamps window position if the window
 	# becomes so big that it would bleed beyond screen edges, adding an unwanted offset to
 	# the final position
 	var target_new_window_position := previous_window_position + previous_window_size / 2 - new_window_size / 2
 
 	# Resize to wanted scale
-	DisplayServer.window_set_size(new_window_size)
-
-	# Hack to force window size refresh
-	# See https://github.com/godotengine/godot/issues/89543
-	DisplayServer.window_set_size(DisplayServer.window_get_size() + Vector2i(1,0))
-	DisplayServer.window_set_size(DisplayServer.window_get_size() - Vector2i(1,0))
+	# Note that window.size is recommended over DisplayServer.window_set_size
+	# In https://github.com/godotengine/godot/issues/89543, we found out that it guarantees
+	# immediate content update on Linux X11, without a need for the hack to move window by 1px
+	# and back
+	window.size = new_window_size
 
 	# Optional safety wait before adjusting position in case window scale is lagging
 	for i in range(safety_frames_between_scale_and_reposition_window):
 		await get_tree().process_frame
 
 	# Adjust position to preserve previous center
-	DisplayServer.window_set_position(target_new_window_position)
+	window.position = target_new_window_position
 
 
 func change_resolution(delta: int):
