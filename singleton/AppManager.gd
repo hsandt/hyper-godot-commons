@@ -205,7 +205,7 @@ func set_window_scale(scale: float):
 	# Note that new_window_size is without decorations, so we should also subtract previous_window_size
 	# without decorations for a consistent delta
 	var window_size_delta := new_window_size - previous_window_size
-	DisplayServer.window_set_position(DisplayServer.window_get_position() - Vector2i(window_size_delta / 2.0))
+	DisplayServer.window_set_position.call_deferred(DisplayServer.window_get_position() - Vector2i(window_size_delta / 2.0))
 
 
 func change_resolution(delta: int):
