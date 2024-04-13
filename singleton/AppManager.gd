@@ -53,6 +53,14 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 ## Note: it takes precedence over auto_scale on PC template
 @export var auto_fullscreen_in_pc_template: bool = false
 
+## How many frames to wait after setting window scale (initially or on change)
+## before auto-repositioning window to preserve center
+## On small games, 0 works, but the more complex the scene is, and the slower
+## the system is, the more time it takes to finish rescaling and the higher this needs to be
+## (according to tests, a certain 2D game required 1 for initial repositioning and
+## 5 for further repositioning during the game to work at 100%)
+@export var safety_frames_between_scale_and_reposition_window: int = 0
+
 ## (Debug only) If true, show the debug overlay on start, else hide it
 @export var debug_show_debug_overlay_on_start: bool = false
 
@@ -190,9 +198,20 @@ func set_window_scale(scale: float):
 			[new_window_size, cached_screen_usable_rect_size])
 		return
 
-	# Store window size (without decorations) before change
+	# Store window top-left position (without decorations) and size (without decorations) before change
+	var previous_window_position := DisplayServer.window_get_position()
 	var previous_window_size := DisplayServer.window_get_size()
 
+	# Since window_set_size keeps top-left and we want to preserve window center,
+	# predict wanted top-left position with new scale by adding previous window extent (half size)
+	# to get window center, then subtract new window extent to get new window top-left
+	# Note that this method works in all cases, unlike subtracting new_window_size / 2 *after*
+	# window_set_size(), as window_set_size() automatically clamps window position if the window
+	# becomes so big that it would bleed beyond screen edges, adding an unwanted offset to
+	# the final position
+	var target_new_window_position := previous_window_position + previous_window_size / 2 - new_window_size / 2
+
+	# Resize to wanted scale
 	DisplayServer.window_set_size(new_window_size)
 
 	# Hack to force window size refresh
@@ -200,12 +219,12 @@ func set_window_scale(scale: float):
 	DisplayServer.window_set_size(DisplayServer.window_get_size() + Vector2i(1,0))
 	DisplayServer.window_set_size(DisplayServer.window_get_size() - Vector2i(1,0))
 
-	# Since window_set_size keeps top-left and we want to preserve recenter, adjust position by subtracting
-	# half of the window size delta (if scaling down, window_size_delta has negative components, but this also works)
-	# Note that new_window_size is without decorations, so we should also subtract previous_window_size
-	# without decorations for a consistent delta
-	var window_size_delta := new_window_size - previous_window_size
-	DisplayServer.window_set_position.call_deferred(DisplayServer.window_get_position() - Vector2i(window_size_delta / 2.0))
+	# Optional safety wait before adjusting position in case window scale is lagging
+	for i in range(safety_frames_between_scale_and_reposition_window):
+		await get_tree().process_frame
+
+	# Adjust position to preserve previous center
+	DisplayServer.window_set_position(target_new_window_position)
 
 
 func change_resolution(delta: int):
