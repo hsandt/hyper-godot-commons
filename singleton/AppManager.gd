@@ -228,6 +228,12 @@ func set_window_scale(scale: float):
 
 
 func change_resolution(delta: int):
+	if DisplayServer.window_get_mode() in \
+			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
+		push_warning("[AppManager] change_resolution: Window is currently fullscreen, ",
+			"don't do anything to avoid glitchy attempt to resize window while stuck in fullscreen")
+		return
+
 	var new_preset_window_scale_index := (current_window_scale_preset_index + delta) % \
 			cached_valid_window_scale_presets.size()
 
