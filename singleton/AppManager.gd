@@ -53,14 +53,6 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 ## Note: it takes precedence over auto_scale on PC template
 @export var auto_fullscreen_in_pc_template: bool = false
 
-## How many frames to wait after setting window scale (initially or on change)
-## before auto-repositioning window to preserve center
-## On small games, 0 works, but the more complex the scene is, and the slower
-## the system is, the more time it takes to finish rescaling and the higher this needs to be
-## (according to tests, a certain 2D game required 1 for initial repositioning and
-## 5 for further repositioning during the game to work at 100%)
-@export var safety_frames_between_scale_and_reposition_window: int = 0
-
 ## (Debug only) If true, show the debug overlay on start, else hide it
 @export var debug_show_debug_overlay_on_start: bool = false
 
@@ -108,7 +100,7 @@ func _ready():
 		toggle_fullscreen.call_deferred()
 	else:
 		# Force update: true for initial window scale
-		set_window_scale_preset_index(initial_window_scale_preset_index, true)
+		set_window_scale_preset_index.call_deferred(initial_window_scale_preset_index, true)
 
 	if debug_overlay != null:
 		# Show debug overlay by default only in editor/debug exports, if corresponding flag is true
@@ -199,18 +191,26 @@ func set_window_scale(scale: float):
 		return
 
 	var window := get_window()
+
 	# Store window top-left position (without decorations) and size (without decorations) before change
 	var previous_window_position := window.position
 	var previous_window_size := window.size
 
+	# We must make sure to set position *before* size to avoid bug where window.position is reverted
+	# to its old value 1 frame later (https://github.com/godotengine/godot/issues/90638)
+	# Therefore we compute new_window_position in advance
+	# It also has the benefit to ignore any window clamping done by setting window.size
+	# while window is getting bigger too close to the screen bottom-right edges,
+	# since the position is computed before resizing, and there is no clamping afterward
+	# since the window will be already placed at the proper top-left.
+
 	# Since setting window.size keeps top-left and we want to preserve window center,
 	# predict wanted top-left position with new scale by adding previous window extent (half size)
 	# to get window center, then subtract new window extent to get new window top-left
-	# Note that this method works in all cases, unlike subtracting new_window_size / 2 *after*
-	# setting window.size, as setting window.size automatically clamps window position if the window
-	# becomes so big that it would bleed beyond screen edges, adding an unwanted offset to
-	# the final position
-	var target_new_window_position := previous_window_position + previous_window_size / 2 - new_window_size / 2
+	var new_window_position := previous_window_position + previous_window_size / 2 - new_window_size / 2
+
+	# Adjust position to preserve previous center
+	window.position = new_window_position
 
 	# Resize to wanted scale
 	# Note that window.size is recommended over DisplayServer.window_set_size
@@ -218,13 +218,6 @@ func set_window_scale(scale: float):
 	# immediate content update on Linux X11, without a need for the hack to move window by 1px
 	# and back
 	window.size = new_window_size
-
-	# Optional safety wait before adjusting position in case window scale is lagging
-	for i in range(safety_frames_between_scale_and_reposition_window):
-		await get_tree().process_frame
-
-	# Adjust position to preserve previous center
-	window.position = target_new_window_position
 
 
 func change_resolution(delta: int):
