@@ -32,3 +32,18 @@ static func instantiate_under_at_deferred(packed_scene: PackedScene, parent: Nod
 	parent.add_child.call_deferred(instance, OS.has_feature("debug"))
 	instance.global_position = global_position
 	return instance
+
+
+## Set the flip X state of passed node by setting transform parameters accordingly
+## This function is idempotent, so calling it twice on the same node with flip: true
+## will just flip it once.
+static func set_flip_x(node: Node2D, flip: bool) -> void:
+	if flip:
+		# To avoid repeated flips when calling this function multiple times with flip: true,
+		# we make sure to change scale.y instead of scale.x, and adjust rotation accordingly
+		# https://godotengine.org/qa/92282/why-my-character-scale-keep-changing?show=146969#a146969
+		node.scale.y = -1.0
+		node.rotation = PI
+	else:
+		node.scale.y = 1.0
+		node.rotation = 0.0

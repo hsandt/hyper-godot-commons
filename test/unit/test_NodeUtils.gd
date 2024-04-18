@@ -38,3 +38,23 @@ func test_instantiate_under_at_deferred():
 	assert_eq(instance.global_position, Vector2(1.0, 2.0))
 	await get_tree().physics_frame
 	assert_eq(instance.get_parent(), get_tree().root)
+
+func test_set_flip_x_false():
+	var node := Node2D.new()
+	add_child_autofree(node)
+
+	NodeUtils.set_flip_x(node, false)
+
+	assert_eq(node.scale.y, 1.0)
+	assert_eq(node.rotation, 0.0)
+	assert_eq(node.rotation_degrees, 0.0)
+
+func test_set_flip_x_true():
+	var node := Node2D.new()
+	add_child_autofree(node)
+
+	NodeUtils.set_flip_x(node, true)
+
+	assert_eq(node.scale.y, -1.0)
+	assert_almost_eq(node.rotation, PI, 1e-7)
+	assert_eq(node.rotation_degrees, 180)
