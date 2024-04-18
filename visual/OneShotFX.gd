@@ -7,6 +7,9 @@ extends Node2D
 ## - autoplay set to a non-looping animation
 ## - no autoplay, but the animation to play set in inspector instead
 ## In general, a OneShotFX has only one animation named "default"
+##
+## ! This does not support AnimationPlayer and will not detect
+## ! animation end if played via AnimationPlayer
 
 
 ## Signal emitted when animated_sprite animation has finished
@@ -20,6 +23,11 @@ signal animation_finished
 
 func _ready():
 	DebugUtils.assert_member_is_set(self, animated_sprite, "animated_sprite")
+	if OS.has_feature("debug"):
+		if find_children("*", "AnimationPlayer", false):
+			push_warning("[OneShotFX] FX '%s' has an AnimationPlayer, which is not supported. ",
+				"Please play animation directly on AnimatedSprite2D (via script or auto-play).")
+
 	animated_sprite.animation_finished.connect(_on_animated_sprite_2d_animation_finished)
 
 
