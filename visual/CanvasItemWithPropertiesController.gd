@@ -4,7 +4,7 @@ extends CanvasItem
 ## on the animated sprite material, which should use the shader custom_sprite_shader.gdshader.
 ## Each entity should have its own material instance, see shader_material doc comment for more
 ## details.
-## If you are controlling many canvas items with way, prefer ShaderParameterController
+## If you are controlling many canvas items this way, prefer ShaderParameterController
 
 
 ## When true, update material brightness to match state variable every frame
