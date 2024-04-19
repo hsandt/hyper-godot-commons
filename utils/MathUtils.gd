@@ -68,21 +68,34 @@ static func cardinal_direction_to_angle(cardinal_direction: MathEnums.CardinalDi
 	return unit_vector2.angle()
 
 
-## Return dominant cardinal direction of vector2i
-## (applying cardinal_direction_to_unit_vector2i to this value would return
-## the unit Vector2i whose angle with vector2i is minimal)
+## Return dominant cardinal direction of passed vector i.e. the direction of the unit
+## vector the closest to passed vector
+## UB unless vector is not ZERO
+## If vector's components have same absolute value (angle with cardinal direction
+## of 45 degrees), select horizontal direction if flag prioritize_horizontal
+## is true, vertical direction else
+static func vector_to_dominant_cardinal_direction(vector: Vector2,
+		prioritize_horizontal: bool = true) -> MathEnums.CardinalDirection:
+	assert(vector != Vector2.ZERO, "[MathUtils] vector_to_dominant_cardinal_direction: vector is ZERO")
+
+	# Godot provides max_axis_index => AXIS_X/Y which we could use
+	# to avoid comparing abs_x and abs_y ourselves, unfortunately they
+	# assume prioritize_horizontal=true, so for full flexibility it's better
+	# to check for equality case ourselves
+	var abs_x := abs(vector.x)
+	var abs_y := abs(vector.y)
+	if abs_x > abs_y or (abs_x == abs_y and prioritize_horizontal):
+		return MathEnums.CardinalDirection.LEFT if vector.x < 0 else MathEnums.CardinalDirection.RIGHT
+	else:
+		return MathEnums.CardinalDirection.UP if vector.y < 0 else MathEnums.CardinalDirection.DOWN
+
+
+## Return dominant cardinal direction of passed vector2i i.e. the direction of the unit
+## vector the closest to passed vector2i
 ## UB unless vector2i is not ZERO
 ## If vector2i's components have same absolute value (angle with cardinal direction
 ## of 45 degrees), select horizontal direction if flag prioritize_horizontal
 ## is true, vertical direction else
-static func vector2i_to_dominant_cardinal_direction(vector2i: Vector2i, prioritize_horizontal: bool = true):
-	# Godot provides min/max_axis_index => AXIS_X/Y which we could use
-	# to avoid comparing abs_x and abs_y ourselves, unfortunately they
-	# assume prioritize_horizontal=true for for full flexibility it's better
-	# to check for equality case ourselves
-	var abs_x = abs(vector2i.x)
-	var abs_y = abs(vector2i.y)
-	if abs_x > abs_y or (abs_x == abs_y and prioritize_horizontal):
-		return MathEnums.CardinalDirection.LEFT if vector2i.x < 0 else MathEnums.CardinalDirection.RIGHT
-	else:
-		return MathEnums.CardinalDirection.UP if vector2i.y < 0 else MathEnums.CardinalDirection.DOWN
+static func vector2i_to_dominant_cardinal_direction(vector2i: Vector2i,
+		prioritize_horizontal: bool = true) -> MathEnums.CardinalDirection:
+	return vector_to_dominant_cardinal_direction(vector2i as Vector2, prioritize_horizontal)
