@@ -16,7 +16,7 @@ extends Node
 ##                                          Ctrl+Meta+F (macOS style)
 ##     app_toggle_debug_overlay
 ##     app_take_screenshot_scaled - recommended: F12 (Steam style)
-##     app_take_screenshot_native - recommended: Shift+F12
+##     app_take_screenshot_native - recommended: Ctrl/Shift+F12
 ##     app_exit - recommended: Ctrl+Q (Linux/Windows style),
 ##                             Meta+Q (macOS style)
 
