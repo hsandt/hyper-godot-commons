@@ -48,7 +48,7 @@ func play():
 	if animation_player:
 		animation_player.play(&"default")
 	else:
-		animated_sprite.play()
+		animated_sprite.play(&"default")
 
 
 func _on_animation_player_animation_finished(anim_name: StringName):
