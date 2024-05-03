@@ -86,6 +86,8 @@ func _physics_process(_delta: float):
 
 ## Play an animation from start
 func play_animation(animation_name: StringName):
+	var last_animation := animation_player.assigned_animation
+
 	if animation_tree:
 		state_machine.travel(animation_name)
 	else:
@@ -109,6 +111,20 @@ func play_animation(animation_name: StringName):
 		else:
 			push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation '%s'"
 				% [animation_player.get_parent().name, animation_name])
+
+	if last_animation != animation_name:
+		# Target animation changed, call virtual method for custom behavior
+		# It only cares about the *target* animation, so when using an animation tree,
+		# it will not detect travel through intermediate animations
+		# (when using animation player, target animation is same as new animation)
+		# In counterpart, it has a few advantages compared to using native signals:
+		# - no need to handle AnimationMixer signals: animation_started and animation_finished
+		#   separately (we cannot use AnimationPlayer.animation_changed which only works
+		#   for queued animations, and AnimationPlayer.current_animation_changed doesn't
+		#   know the old animation either, so AnimationMixer signals are the best alternative)
+		# - it ignores the RESET hack above which would emit animation signals twice
+		# - can directly override _on_target_animation_changed on child class
+		_on_target_animation_changed(last_animation, animation_name)
 
 
 ## Play an animation as override
@@ -155,14 +171,15 @@ func clear_any_override_animation():
 
 # abstract
 ## Return base animation based on owner state and last animation
-func _get_base_animation(_last_animation: String) -> StringName:
+func _get_base_animation(_last_animation: StringName) -> StringName:
 	push_error("[AnimationControllerBase] _get_base_animation: abstract method requires implementation")
 	return &""
 
 
+## One one-shot animation finished
 ## Clear override animation if it's the one that finished
 ## and process animation end
-func _on_animation_finished(anim_name: String):
+func _on_animation_finished(anim_name: StringName):
 	if override_animation != &"":
 		clear_override_animation(anim_name)
 
@@ -170,6 +187,14 @@ func _on_animation_finished(anim_name: String):
 
 
 # virtual
-## Process animation end
-func _process_animation_finished(_anim_name: String):
+## Process one-shot animation end
+func _process_animation_finished(_anim_name: StringName):
+	pass
+
+
+# virtual
+## Process change of target animation
+## - when using AnimationPlayer, this is the new animation played immediately
+## - when using AnimationTree, this is the animation we want to travel to
+func _on_target_animation_changed(last_animation: StringName, animation_name: StringName):
 	pass
