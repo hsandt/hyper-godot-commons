@@ -16,6 +16,15 @@ static func instantiate_under(packed_scene: PackedScene, parent: Node) -> Node:
 	return instance
 
 
+## Instantiate a packed scene and parent it at end of current frame
+## It returns the instance immediately, although it will only be parented at end of current frame
+## In editor and debug exports, force readable name (slow operation)
+static func instantiate_under_deferred(packed_scene: PackedScene, parent: Node) -> Node:
+	var instance := packed_scene.instantiate()
+	parent.add_child.call_deferred(instance, OS.has_feature("debug"))
+	return instance
+
+
 ## Instantiate a packed scene under a parent at a global position
 ## In editor and debug exports, force readable name (slow operation)
 static func instantiate_under_at(packed_scene: PackedScene, parent: Node, global_position: Vector2) -> Node:
@@ -25,7 +34,8 @@ static func instantiate_under_at(packed_scene: PackedScene, parent: Node, global
 	return instance
 
 
-## Instantiate a packed scene under a parent at a global position at end of current frame
+## Instantiate a packed scene and move it under a parent at a global position at end of current frame
+## It returns the instance immediately, although it will only be parented at end of current frame
 ## In editor and debug exports, force readable name (slow operation)
 static func instantiate_under_at_deferred(packed_scene: PackedScene, parent: Node, global_position: Vector2) -> Node:
 	var instance := packed_scene.instantiate()
