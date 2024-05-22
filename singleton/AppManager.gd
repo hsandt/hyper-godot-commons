@@ -54,6 +54,9 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 ## Note: it takes precedence over auto_scale on PC template
 @export var auto_fullscreen_in_pc_template: bool = false
 
+## If true, hide cursor when fullscreen is enabled
+@export var hide_cursor_during_fullscreen: bool = false
+
 ## (Debug only) If true, show the debug overlay on start, else hide it
 @export var debug_show_debug_overlay_on_start: bool = false
 
@@ -267,9 +270,13 @@ func toggle_fullscreen():
 	if DisplayServer.window_get_mode() not in \
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
 		new_window_mode = DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+		if hide_cursor_during_fullscreen:
+			DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_HIDDEN)
 		print("[AppManager] Toggle fullscreen: WINDOW_MODE_EXCLUSIVE_FULLSCREEN")
 	else:
 		new_window_mode = DisplayServer.WINDOW_MODE_WINDOWED
+		if hide_cursor_during_fullscreen:
+			DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
 		print("[AppManager] Toggle fullscreen: WINDOW_MODE_WINDOWED")
 
 	DisplayServer.window_set_mode(new_window_mode)
