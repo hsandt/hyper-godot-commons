@@ -34,6 +34,12 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 
 @export_group("Parameters")
 
+## If true, window scale will be initialized following the preset index
+## initial_window_scale_preset_index
+## Even when false, the list of window_scale_presets will be used when
+## changing resolution
+@export var set_window_scale_on_start: bool = false
+
 ## Array of scale presets
 @export var window_scale_presets: Array[float] = [
 		1.0,
@@ -101,10 +107,13 @@ func _ready():
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN] and \
 			auto_fullscreen_in_pc_template and OS.has_feature("pc") and OS.has_feature("template"):
 		print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
+		# Defer display change on game start to ensure it works
 		toggle_fullscreen.call_deferred()
 	else:
-		# Force update: true for initial window scale
-		set_window_scale_preset_index.call_deferred(initial_window_scale_preset_index, true)
+		if set_window_scale_on_start:
+			# Defer display change on game start to ensure it works
+			# Force update: true for initial window scale
+			set_window_scale_preset_index.call_deferred(initial_window_scale_preset_index, true)
 
 	if debug_overlay != null:
 		# Show debug overlay by default only in editor/debug exports, if corresponding flag is true
