@@ -116,21 +116,29 @@ func _unhandled_input(event: InputEvent):
 	# (hi-dpi is hard to detect and resize is hard to force on start)
 	if _is_action_pressed_in_event_safe(event, &"app_prev_resolution"):
 		change_resolution(-1)
+		get_viewport().set_input_as_handled()
 	elif _is_action_pressed_in_event_safe(event, &"app_next_resolution"):
 		change_resolution(1)
+		get_viewport().set_input_as_handled()
 
 	if _is_action_pressed_in_event_safe(event, &"app_toggle_fullscreen"):
 		toggle_fullscreen()
+		get_viewport().set_input_as_handled()
+
 	if _is_action_pressed_in_event_safe(event, &"app_toggle_debug_overlay") and debug_overlay:
 		toggle_debug_overlay()
+		get_viewport().set_input_as_handled()
 
 	if _is_action_pressed_in_event_safe(event, &"app_take_screenshot_native"):
 		take_screenshot(false)
+		get_viewport().set_input_as_handled()
 	elif _is_action_pressed_in_event_safe(event, &"app_take_screenshot_scaled"):
 		take_screenshot(true)
+		get_viewport().set_input_as_handled()
 
 	if _is_action_pressed_in_event_safe(event, &"app_exit"):
 		get_tree().quit()
+		get_viewport().set_input_as_handled()
 
 
 func _physics_process(_delta: float):
