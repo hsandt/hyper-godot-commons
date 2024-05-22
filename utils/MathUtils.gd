@@ -82,8 +82,8 @@ static func vector_to_dominant_cardinal_direction(vector: Vector2,
 	# to avoid comparing abs_x and abs_y ourselves, unfortunately they
 	# assume prioritize_horizontal=true, so for full flexibility it's better
 	# to check for equality case ourselves
-	var abs_x := abs(vector.x)
-	var abs_y := abs(vector.y)
+	var abs_x := absf(vector.x)
+	var abs_y := absf(vector.y)
 	if abs_x > abs_y or (abs_x == abs_y and prioritize_horizontal):
 		return MathEnums.CardinalDirection.LEFT if vector.x < 0 else MathEnums.CardinalDirection.RIGHT
 	else:
