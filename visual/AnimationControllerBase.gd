@@ -26,10 +26,12 @@ extends Node
 ##   it takes priority until it ends (e.g. Attack)
 ##
 ## Usage:
-## - subclass this class with some class MyAnimationControllerBase
-## - add an exported owner member to MyAnimationControllerBase of type:
-##   the type of the node that contains state information used for the animation.
-##   For instance, for a character, it could be some MyCharacter class
+## - subclass this class with some class MyAnimationController
+## - in MyAnimationController, add an exported member representing the model that contains
+##   state information used for the animation.
+##   For instance, for a character, it could be some MyCharacter class:
+##   `@export var character: MyCharacter`
+##   and assign it in the inspector
 ## - implement _get_base_animation to return the wanted base animation based on
 ##   owner state, and possibly previous animation
 ## - implement _on_animation_finished to process animation ends
