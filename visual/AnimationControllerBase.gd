@@ -32,6 +32,12 @@ extends Node
 ##   For instance, for a character, it could be some MyCharacter class:
 ##   `@export var character: MyCharacter`
 ##   and assign it in the inspector
+##   You can also check for assignment in initialize:
+##   ```
+##   func initialize():
+##   	super.initialize()
+##   	assert(character, "character is not set on %s" % get_path())
+##   ```
 ## - implement _get_base_animation to return the wanted base animation based on
 ##   owner state, and possibly previous animation
 ## - implement _on_animation_finished to process animation ends
