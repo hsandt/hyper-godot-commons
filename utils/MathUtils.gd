@@ -88,14 +88,3 @@ static func vector_to_dominant_cardinal_direction(vector: Vector2,
 		return MathEnums.CardinalDirection.LEFT if vector.x < 0 else MathEnums.CardinalDirection.RIGHT
 	else:
 		return MathEnums.CardinalDirection.UP if vector.y < 0 else MathEnums.CardinalDirection.DOWN
-
-
-## Return dominant cardinal direction of passed vector2i i.e. the direction of the unit
-## vector the closest to passed vector2i
-## UB unless vector2i is not ZERO
-## If vector2i's components have same absolute value (angle with cardinal direction
-## of 45 degrees), select horizontal direction if flag prioritize_horizontal
-## is true, vertical direction else
-static func vector2i_to_dominant_cardinal_direction(vector2i: Vector2i,
-		prioritize_horizontal: bool = true) -> MathEnums.CardinalDirection:
-	return vector_to_dominant_cardinal_direction(vector2i as Vector2, prioritize_horizontal)
