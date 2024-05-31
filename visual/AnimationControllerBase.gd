@@ -103,8 +103,12 @@ func play_animation(animation_name: StringName):
 			# Workaround for RESET animation values not being used as default properties when missing
 			# from new animation
 			# See https://github.com/godotengine/godot-proposals/issues/6417
-			animation_player.play(&"RESET")
-			animation_player.advance(0)
+			if animation_player.has_animation(&"RESET"):
+				animation_player.play(&"RESET")
+				animation_player.advance(0)
+			else:
+				push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation 'RESET'"
+					% animation_player.get_parent().name)
 
 			# Note that if you remove the hack above, in order to guarantee playing
 			# animation from start, you will need to add `animation_player.stop(true)`
