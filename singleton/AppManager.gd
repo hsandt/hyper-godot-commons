@@ -278,25 +278,53 @@ func toggle_fullscreen():
 	# For debug, borderless window is enough
 	if DisplayServer.window_get_mode() not in \
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
-		new_window_mode = DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
-		if hide_cursor_during_fullscreen:
-			DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_HIDDEN)
-		print("[AppManager] Toggle fullscreen: WINDOW_MODE_EXCLUSIVE_FULLSCREEN")
+		_enable_fullscreen()
 	else:
-		new_window_mode = DisplayServer.WINDOW_MODE_WINDOWED
-		if hide_cursor_during_fullscreen:
-			DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
-		print("[AppManager] Toggle fullscreen: WINDOW_MODE_WINDOWED")
+		_disable_fullscreen()
 
-	DisplayServer.window_set_mode(new_window_mode)
 
+func set_fullscreen_enabled(value: bool):
+	if value:
+		_enable_fullscreen()
+	else:
+		_disable_fullscreen()
+
+
+func _enable_fullscreen():
+	# Do nothing if already in exclusive fullscreen
+	# In the edge case where we are in non-exclusive fullscreen (shouldn't happen
+	# when always using AppManager API), we still force update to exclusive fullscreen
+	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+		return
+
+	if hide_cursor_during_fullscreen:
+		DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_HIDDEN)
+
+	print("[AppManager] Toggle fullscreen: WINDOW_MODE_EXCLUSIVE_FULLSCREEN")
+
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+
+	fullscreen_toggled.emit(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+
+
+func _disable_fullscreen():
+	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED:
+		return
+
+	if hide_cursor_during_fullscreen:
+		DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
+
+	print("[AppManager] Toggle fullscreen: WINDOW_MODE_WINDOWED")
+
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+
+	# Workaround for https://github.com/godotengine/godot/issues/90537
 	# When leaving fullscreen, force reset scale to last window scale to fix
-	# Window manager slightly modifying window size after each double toggle fullscreen
+	# window manager slightly modifying window size after each double toggle fullscreen
 	# Do not do this when *entering* fullscreen, this would add an extra lag
-	if new_window_mode == DisplayServer.WINDOW_MODE_WINDOWED:
-		set_window_scale_preset_index(current_window_scale_preset_index, true)
+	set_window_scale_preset_index(current_window_scale_preset_index, true)
 
-	fullscreen_toggled.emit(new_window_mode)
+	fullscreen_toggled.emit(DisplayServer.WINDOW_MODE_WINDOWED)
 
 
 func toggle_debug_overlay():
