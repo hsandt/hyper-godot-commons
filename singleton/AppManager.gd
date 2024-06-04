@@ -126,29 +126,29 @@ func _ready():
 func _unhandled_input(event: InputEvent):
 	# let user toggle hi-dpi resolution freely
 	# (hi-dpi is hard to detect and resize is hard to force on start)
-	if _is_action_pressed_in_event_safe(event, &"app_prev_resolution"):
+	if _is_exact_action_pressed_in_event_safe(event, &"app_prev_resolution"):
 		change_resolution(-1)
 		get_viewport().set_input_as_handled()
-	elif _is_action_pressed_in_event_safe(event, &"app_next_resolution"):
+	elif _is_exact_action_pressed_in_event_safe(event, &"app_next_resolution"):
 		change_resolution(1)
 		get_viewport().set_input_as_handled()
 
-	if _is_action_pressed_in_event_safe(event, &"app_toggle_fullscreen"):
+	if _is_exact_action_pressed_in_event_safe(event, &"app_toggle_fullscreen"):
 		toggle_fullscreen()
 		get_viewport().set_input_as_handled()
 
-	if _is_action_pressed_in_event_safe(event, &"app_toggle_debug_overlay") and debug_overlay:
+	if _is_exact_action_pressed_in_event_safe(event, &"app_toggle_debug_overlay") and debug_overlay:
 		toggle_debug_overlay()
 		get_viewport().set_input_as_handled()
 
-	if _is_action_pressed_in_event_safe(event, &"app_take_screenshot_native"):
+	if _is_exact_action_pressed_in_event_safe(event, &"app_take_screenshot_native"):
 		take_screenshot(false)
 		get_viewport().set_input_as_handled()
-	elif _is_action_pressed_in_event_safe(event, &"app_take_screenshot_scaled"):
+	elif _is_exact_action_pressed_in_event_safe(event, &"app_take_screenshot_scaled"):
 		take_screenshot(true)
 		get_viewport().set_input_as_handled()
 
-	if _is_action_pressed_in_event_safe(event, &"app_exit"):
+	if _is_exact_action_pressed_in_event_safe(event, &"app_exit"):
 		get_tree().quit()
 		get_viewport().set_input_as_handled()
 
@@ -219,6 +219,8 @@ func set_window_scale(scale: float):
 
 	# We must make sure to set position *before* size to avoid bug where window.position is reverted
 	# to its old value 1 frame later (https://github.com/godotengine/godot/issues/90638)
+	# (it has one known issue though, when cycling from biggest to smallest window, the window will end
+	# up in the wrong position due to clamping)
 	# Therefore we compute new_window_position in advance
 	# It also has the benefit to ignore any window clamping done by setting window.size
 	# while window is getting bigger too close to the screen bottom-right edges,
@@ -395,5 +397,5 @@ func save_screenshot_in(screenshot_filepath: String, scaled: bool):
 		print("[AppManager] Saved %s screenshot in %s" % ["scaled" if scaled else "native", screenshot_filepath])
 
 
-func _is_action_pressed_in_event_safe(event: InputEvent, action: StringName):
-	return InputMap.has_action(action) and event.is_action_pressed(action)
+func _is_exact_action_pressed_in_event_safe(event: InputEvent, action: StringName):
+	return InputMap.has_action(action) and event.is_action_pressed(action, false, true)
