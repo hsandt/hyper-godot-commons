@@ -43,6 +43,11 @@ extends Node
 ## - implement _on_animation_finished to process animation ends
 ##   and handle transitions
 
+## Animation player
+## When using animation tree:
+## - this is still used to get the assigned animation
+## - if set, we'll use
+## - if not set, we'll retrieve it from animation tree
 @export var animation_player: AnimationPlayer
 
 ## Optional animation tree
@@ -62,14 +67,25 @@ func _ready():
 
 
 func initialize():
-	assert(animation_player, "animation_player is not set on %s" % get_path())
-
-	animation_player.animation_finished.connect(_on_animation_finished)
+	if animation_tree:
+		if animation_player:
+			assert(animation_player == animation_tree.get_node(animation_tree.anim_player),
+				"[AnimationControllerBase] animation_player does not match animation_tree.anim_player node path")
+		else:
+			animation_player = animation_tree.get_node(animation_tree.anim_player)
+	else:
+		assert(animation_player, "animation_player is not set on %s" % get_path())
+		animation_player.animation_finished.connect(_on_animation_finished)
 
 	if animation_tree:
+		# We often deactivate animation tree in the editor to stop previewing
+		# (which conflicts with AnimatedSprite2D animation previewing)
+		# so manually activate it from code if needed
+		animation_tree.active = true
+
 		state_machine = animation_tree["parameters/playback"]
 		# When using animation tree, AnimationPlayer.animation_finished signal is not emitted,
-		# so we must plug to the equivalent AnimationTree signal
+		# so we must plug to the equivalent AnimationTree signal instead
 		animation_tree.animation_finished.connect(_on_animation_finished)
 
 
