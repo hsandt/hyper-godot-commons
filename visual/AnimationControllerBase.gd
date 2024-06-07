@@ -45,8 +45,8 @@ extends Node
 
 ## Animation player
 ## When using animation tree:
-## - this is still used to get the assigned animation
-## - if set, we'll use
+## - this is still used to verify if animation exists with get_animation(...)
+## - if set, we'll use it, but verify that it's the one used by the animation tree
 ## - if not set, we'll retrieve it from animation tree
 @export var animation_player: AnimationPlayer
 
@@ -101,58 +101,71 @@ func _physics_process(_delta: float):
 
 	# both `current_animation` and `assigned_animation` work to get the last
 	# base animation
-	var last_animation = animation_player.assigned_animation
+	var last_animation = get_current_animation()
 	var wanted_base_animation = _get_base_animation(last_animation)
 
 	if wanted_base_animation != last_animation:
 		play_animation(wanted_base_animation)
 
 
+## Return name of current animation
+func get_current_animation() -> StringName:
+	if animation_tree:
+		return state_machine.get_current_node()
+	else:
+		return animation_player.assigned_animation
+
+
 ## Play an animation from start
 func play_animation(animation_name: StringName):
-	var last_animation := animation_player.assigned_animation
+	# There is currently no method to check if animation node exists in Animation Tree
+	# so check animation on the animation player in all cases instead
+	# See https://github.com/godotengine/godot-proposals/issues/6316
+	# This works because we follow the convention to name all the animation tree nodes
+	# like the animations
+	if not animation_player.has_animation(animation_name):
+		push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation '%s'"
+			% [animation_player.get_parent().name, animation_name])
+		return
+
+	var last_animation := get_current_animation()
 
 	if animation_tree:
+		# This works because we follow the convention to name all the animation tree nodes
+		# like the animations
 		state_machine.travel(animation_name)
 	else:
-		if animation_player.has_animation(animation_name):
-			# Workaround for RESET animation values not being used as default properties when missing
-			# from new animation
-			# See https://github.com/godotengine/godot-proposals/issues/6417
-			if animation_player.has_animation(&"RESET"):
-				animation_player.play(&"RESET")
-				animation_player.advance(0)
-			else:
-				push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation 'RESET'"
-					% animation_player.get_parent().name)
-
-			# Note that if you remove the hack above, in order to guarantee playing
-			# animation from start, you will need to add `animation_player.stop(true)`
-			# instead, with keep_state: true to avoid unnecessary processing since
-			# we are going to play another (or the same) animation on top
-
-			animation_player.play(animation_name)
-
-			# extra advance is required when this is called from _on_animation_finished
-			# avoid showing default state for 1 frame
+		# Workaround for RESET animation values not being used as default properties when missing
+		# from new animation
+		# See https://github.com/godotengine/godot-proposals/issues/6417
+		if animation_player.has_animation(&"RESET"):
+			animation_player.play(&"RESET")
 			animation_player.advance(0)
 		else:
-			push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation '%s'"
-				% [animation_player.get_parent().name, animation_name])
+			push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation 'RESET'"
+				% animation_player.get_parent().name)
+
+		# Note that if you remove the hack above, in order to guarantee playing
+		# animation from start, you will need to add `animation_player.stop(true)`
+		# instead, with keep_state: true to avoid unnecessary processing since
+		# we are going to play another (or the same) animation on top
+
+		animation_player.play(animation_name)
+
+		# extra advance is required when this is called from _on_animation_finished
+		# avoid showing default state for 1 frame
+		animation_player.advance(0)
 
 	if last_animation != animation_name:
-		# Target animation changed, call virtual method for custom behavior
-		# It only cares about the *target* animation, so when using an animation tree,
-		# it will not detect travel through intermediate animations
-		# (when using animation player, target animation is same as new animation)
-		# In counterpart, it has a few advantages compared to using native signals:
+		# Animation changed, call virtual method for custom behavior
+		# It has a few advantages compared to using native signals:
 		# - no need to handle AnimationMixer signals: animation_started and animation_finished
 		#   separately (we cannot use AnimationPlayer.animation_changed which only works
 		#   for queued animations, and AnimationPlayer.current_animation_changed doesn't
 		#   know the old animation either, so AnimationMixer signals are the best alternative)
 		# - it ignores the RESET hack above which would emit animation signals twice
-		# - can directly override _on_target_animation_changed on child class
-		_on_target_animation_changed(last_animation, animation_name)
+		# - can directly override _on_animation_changed on child class
+		_on_animation_changed(last_animation, animation_name)
 
 
 ## Play an animation as override
@@ -164,6 +177,7 @@ func play_animation(animation_name: StringName):
 ## The override animation is expected to be one-shot, so it can end naturally.
 func play_override_animation(animation_name: StringName, force_restart: bool = true):
 	# Retrieve Animation resource from the appropriate library and warn if looping
+	# Note: animation_player.get_animation works when using animation tree
 	var animation_resource := animation_player.get_animation(animation_name)
 	if animation_resource and animation_resource.loop_mode != Animation.LOOP_NONE:
 		push_error("[AnimationControllerBase] Animation '%s' is expected not to loop, but it does. "
@@ -222,7 +236,7 @@ func _process_animation_finished(_anim_name: StringName):
 
 # virtual
 ## Process change of target animation
-## - when using AnimationPlayer, this is the new animation played immediately
-## - when using AnimationTree, this is the animation we want to travel to
-func _on_target_animation_changed(last_animation: StringName, animation_name: StringName):
+## - when using AnimationPlayer, this is the assigned animation
+## - when using AnimationTree, this is current node animation
+func _on_animation_changed(last_animation: StringName, animation_name: StringName):
 	pass
