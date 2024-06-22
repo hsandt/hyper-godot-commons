@@ -2,9 +2,11 @@ class_name TimerUtils
 ## Util static functions for Timer nodes
 
 
-## Create a one-shot physics timer with given duration and optional callback
+## Create a one-shot physics timer with optional duration and optional callback
 ## under given parent (often passing self), and return it
-static func create_one_shot_physics_timer_under(parent: Node, duration: float,
+## If no duration is passed, a dummy wait_time of 1.0 is assigned, so you must
+## make sure to always call timer.start passing a custom duration.
+static func create_one_shot_physics_timer_under(parent: Node, duration: float = 1.0,
 		callback: Callable = Callable()) -> Timer:
 	var timer := Timer.new()
 	timer.one_shot = true
