@@ -186,11 +186,7 @@ func play_override_animation(animation_name: StringName, force_restart: bool = t
 
 	if override_animation != animation_name or force_restart:
 		override_animation = animation_name
-
-		if animation_tree:
-			state_machine.travel(animation_name)
-		else:
-			play_animation(override_animation)
+		play_animation(override_animation)
 
 
 ## Clear override animation, expecting it to be passed animation
