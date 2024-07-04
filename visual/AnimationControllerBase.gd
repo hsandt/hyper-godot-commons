@@ -131,9 +131,17 @@ func play_animation(animation_name: StringName):
 	var last_animation := get_current_animation()
 
 	if animation_tree:
-		# This works because we follow the convention to name all the animation tree nodes
-		# like the animations
-		state_machine.travel(animation_name)
+		# We can pass animation_name directly to start/travel because we follow
+		# the convention to name all the animation tree nodes like the animations
+		if last_animation == animation_name:
+			# When already playing the same animation
+			# (including when chaining from last frame)
+			# we need to force restart (travel would not restart the animation
+			# and unlike AnimationPlayer, stop only pauses so travel would
+			# not work after stop either)
+			state_machine.start(animation_name)
+		else:
+			state_machine.travel(animation_name)
 	else:
 		# Workaround for RESET animation values not being used as default properties when missing
 		# from new animation
@@ -146,7 +154,8 @@ func play_animation(animation_name: StringName):
 				% animation_player.get_parent().name)
 
 		# Note that if you remove the hack above, in order to guarantee playing
-		# animation from start, you will need to add `animation_player.stop(true)`
+		# animation from start when the same animation is already playing,
+		# you will need to add `animation_player.stop(true)`
 		# instead, with keep_state: true to avoid unnecessary processing since
 		# we are going to play another (or the same) animation on top
 
