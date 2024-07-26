@@ -1,5 +1,17 @@
 extends GutTest
 
+func test_horizontal_direction_to_opposite_assert_left_gives_right():
+	assert_eq(MathUtils.horizontal_direction_to_opposite(MathEnums.HorizontalDirection.LEFT), MathEnums.HorizontalDirection.RIGHT)
+
+func test_horizontal_direction_to_opposite_assert_right_gives_left():
+	assert_eq(MathUtils.horizontal_direction_to_opposite(MathEnums.HorizontalDirection.RIGHT), MathEnums.HorizontalDirection.LEFT)
+
+func test_horizontal_direction_to_sign_assert_right_gives_minus_1():
+	assert_eq(MathUtils.horizontal_direction_to_sign(MathEnums.HorizontalDirection.LEFT), -1)
+
+func test_horizontal_direction_to_sign_assert_right_gives_1():
+	assert_eq(MathUtils.horizontal_direction_to_sign(MathEnums.HorizontalDirection.RIGHT), 1)
+
 func test_horizontal_direction_to_unit_vector2i_assert_left_gives_vector_left():
 	assert_eq(MathUtils.horizontal_direction_to_unit_vector2i(MathEnums.HorizontalDirection.LEFT), Vector2i.LEFT)
 

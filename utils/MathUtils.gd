@@ -2,6 +2,32 @@ class_name MathUtils
 ## Util static functions for math & geometry
 
 
+## Return Vector2i corresponding to opposite horizontal direction
+static func horizontal_direction_to_opposite(horizontal_direction: MathEnums.HorizontalDirection) -> MathEnums.HorizontalDirection:
+	match horizontal_direction:
+		MathEnums.HorizontalDirection.LEFT:
+			return MathEnums.HorizontalDirection.RIGHT
+		MathEnums.HorizontalDirection.RIGHT:
+			return MathEnums.HorizontalDirection.LEFT
+		_:
+			push_error("[MathUtils] horizontal_direction_to_opposite: invalid horizontal_direction %d" %
+				horizontal_direction)
+			return MathEnums.HorizontalDirection.LEFT
+
+
+## Return integer sign corresponding to horizontal direction X value
+static func horizontal_direction_to_sign(horizontal_direction: MathEnums.HorizontalDirection) -> int:
+	match horizontal_direction:
+		MathEnums.HorizontalDirection.LEFT:
+			return -1
+		MathEnums.HorizontalDirection.RIGHT:
+			return 1
+		_:
+			push_error("[MathUtils] horizontal_direction_to_sign: invalid horizontal_direction %d" %
+				horizontal_direction)
+			return 0
+
+
 ## Return Vector2i corresponding to horizontal direction
 static func horizontal_direction_to_unit_vector2i(horizontal_direction: MathEnums.HorizontalDirection) -> Vector2i:
 	match horizontal_direction:
