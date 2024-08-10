@@ -174,6 +174,11 @@ func play_animation(animation_name: StringName):
 		#   know the old animation either, so AnimationMixer signals are the best alternative)
 		# - it ignores the RESET hack above which would emit animation signals twice
 		# - can directly override _on_animation_changed on child class
+		# In addition, it has the following difference, which may be an advantage of disadvantage
+		# depending on your needs:
+		# - if using AnimationTree and the transition to next animation needs to travel through
+		#   multiple nodes, this will ignore intermediate nodes (animation_name is just the new
+		#   target animation)
 		_on_animation_changed(last_animation, animation_name)
 
 
