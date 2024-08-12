@@ -43,6 +43,12 @@ extends Node
 ## - implement _on_animation_finished to process animation ends
 ##   and handle transitions
 
+## Own signal to notify when an animation finished, agnostic of AnimationMixer type
+## When using animation tree and traveling through multiple animation nodes,
+## this is also emitted when each intermediate animation is finished
+## Note: this is emitted before custom processing of animation finished
+signal animation_finished(anim_name: StringName)
+
 ## Animation player
 ## When using animation tree:
 ## - this is still used to verify if animation exists with get_animation(...)
@@ -232,6 +238,8 @@ func _get_base_animation(_last_animation: StringName) -> StringName:
 ## Clear override animation if it's the one that finished
 ## and process animation end
 func _on_animation_finished(anim_name: StringName):
+	animation_finished.emit(anim_name)
+
 	if override_animation != &"":
 		clear_override_animation(anim_name)
 
