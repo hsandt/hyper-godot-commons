@@ -63,6 +63,11 @@ signal animation_finished(anim_name: StringName)
 ## If animation tree is assigned, this is its state machine
 var state_machine: AnimationNodeStateMachinePlayback
 
+## If animation tree is assigned, this is the last travel request of the state machine
+## (if still traveling, this is the current travel request, else this is the current node,
+## which was reached at the end of the last travel, since we only use travel)
+var state_machine_last_travel_request: StringName
+
 ## The name of the current override animation, or &"" is none
 var override_animation: StringName
 
@@ -96,6 +101,7 @@ func initialize():
 
 
 func setup():
+	state_machine_last_travel_request = &""
 	clear_any_override_animation()
 
 
@@ -105,13 +111,21 @@ func _physics_process(_delta: float):
 	if override_animation:
 		return
 
-	# both `current_animation` and `assigned_animation` work to get the last
-	# base animation
 	var last_animation = get_current_animation()
 	var wanted_base_animation = _get_base_animation(last_animation)
 
-	if wanted_base_animation != last_animation:
+	var last_assigned_animation = get_assigned_animation()
+
+	if wanted_base_animation != last_assigned_animation:
 		play_animation(wanted_base_animation)
+
+
+## Return name of assigned animation
+func get_assigned_animation() -> StringName:
+	if animation_tree:
+		return state_machine_last_travel_request
+	else:
+		return animation_player.assigned_animation
 
 
 ## Return name of current animation
@@ -119,6 +133,8 @@ func get_current_animation() -> StringName:
 	if animation_tree:
 		return state_machine.get_current_node()
 	else:
+		# Note that we still return assigned_animation here
+		# because current_animation is null at the end of a one-time animation
 		return animation_player.assigned_animation
 
 
@@ -148,6 +164,7 @@ func play_animation(animation_name: StringName):
 			state_machine.start(animation_name)
 		else:
 			state_machine.travel(animation_name)
+			state_machine_last_travel_request = animation_name
 	else:
 		# Workaround for RESET animation values not being used as default properties when missing
 		# from new animation
