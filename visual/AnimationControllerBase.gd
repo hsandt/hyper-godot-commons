@@ -66,6 +66,8 @@ var state_machine: AnimationNodeStateMachinePlayback
 ## If animation tree is assigned, this is the last travel request of the state machine
 ## (if still traveling, this is the current travel request, else this is the current node,
 ## which was reached at the end of the last travel, since we only use travel)
+## This is a workaround for not being able to access travel request at any time,
+## see https://github.com/godotengine/godot-proposals/issues/10445
 var state_machine_last_travel_request: StringName
 
 ## The name of the current override animation, or &"" is none
