@@ -15,6 +15,8 @@ extends Line2D
 
 @export_group("External nodes")
 
+## Target to track
+## Can be set in inspector or programmatically
 @export var target: Node2D
 
 
@@ -33,27 +35,20 @@ extends Line2D
 
 # State
 
-var should_be_completed_flag: bool
-
 var first_point_lifespan_timer: Timer
 var oldest_point_smoothing_timer: Timer
 var advance_to_next_floating_point_timer: Timer
+
+## The trail only tracks target and adds new points when this flag is true
+## Even when false, existing points will stay until oldest point smoothing
+## finishes clearing the old points one by one
+var should_track_target: bool
 
 ## Position of oldest point before starting its smooth motion, so we have a stable lerp
 var oldest_point_smooth_lerp_start_position: Vector2
 
 
 func _ready():
-	DebugUtils.assert_member_is_set(self, target, "target")
-
-	clear_points()
-
-	# For initialization, prepare 2 points: the first frozen point, and the floating point
-	# Since this is exactly the same operation
-	_advance_to_next_floating_point()
-	_advance_to_next_floating_point()
-	oldest_point_smooth_lerp_start_position = points[0]
-
 	# Prepare timer to detect end of lifespan of first point (to start oldest point smoothing)
 	first_point_lifespan_timer = TimerUtils.create_one_shot_physics_timer_under(self,
 		point_lifespan)
@@ -76,15 +71,44 @@ func _ready():
 	advance_to_next_floating_point_timer = TimerUtils.create_periodic_physics_timer_under(self,
 		advance_to_next_floating_point_interval, _advance_to_next_floating_point)
 
-	_start()
+	clear_points()
+
+	should_track_target = false
 
 
-func _start():
+## Start tracking passed target, or previously set target if null is passed
+func start_tracking_target(new_target: Node2D = null):
+	if new_target != null:
+		target = new_target
+	elif target == null:
+		push_error("[Trail2D] start_tracking_target: target is not set and no new_target has been passed")
+		return
+
+	should_track_target = true
+
 	first_point_lifespan_timer.start()
 	advance_to_next_floating_point_timer.start()
 
+	# For initialization, prepare 2 points: the first frozen point, and the floating point
+	# Since this is exactly the same operation
+	_advance_to_next_floating_point()
+	_advance_to_next_floating_point()
+	oldest_point_smooth_lerp_start_position = points[0]
+
+
+## Stop tracking target (without clearing target reference, in case we want to reuse it later)
+func stop_tracking_target():
+	should_track_target = false
+	advance_to_next_floating_point_timer.stop()
+
 
 func _process(delta: float):
+	if not points:
+		# we haven't started tracking target at all
+		# (or we have stopped and let all the old points be removed)
+		# so there is nothing to do, neither with old nor last point
+		return
+
 	# Start applying smooth motion of oldest point after lifespan has passed,
 	# since it applies to the first point
 	if first_point_lifespan_timer.is_stopped():
@@ -101,9 +125,10 @@ func _process(delta: float):
 		var progress_ratio := 1.0 - time_left / advance_to_next_floating_point_interval
 		set_point_position(0, oldest_point_smooth_lerp_start_position.lerp(points[1], progress_ratio))
 
-	# Apply smooth motion for last (most recent) point, following target immediately
-	var n = get_point_count()
-	set_point_position(n - 1, _get_relative_target_position())
+	if should_track_target:
+		# Apply smooth motion for last (most recent) point, following target immediately
+		var n = get_point_count()
+		set_point_position(n - 1, _get_relative_target_position())
 
 
 func _advance_to_next_floating_point():
