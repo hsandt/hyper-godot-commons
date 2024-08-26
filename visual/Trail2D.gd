@@ -1,3 +1,4 @@
+class_name Trail2D
 extends Line2D
 ## 2D Trail
 ## It tracks a target and updates its Line2D points accordingly
@@ -23,14 +24,15 @@ extends Line2D
 @export_group("Parameters")
 
 ## Interval (s) between freezing of last point
-@export var advance_to_next_floating_point_interval: float = 1.0
+@export var advance_to_next_floating_point_interval: float = 0.1
 
 ## Duration after which a given point will be smoothly removed from the trail
 ## Also the duration after which we will start to continuously move the oldest point
 ## from the trail, from the first one.
 ## Smooth removal is done by moving the oldest trail point toward the 2nd oldest point
 ## until the oldest segment is shrunk to a point, at which point we remove the oldest point.
-@export var point_lifespan: float = 1.5
+## We support lifespans that are not a multiple of advance_to_next_floating_point_interval
+@export var point_lifespan: float = 1.0
 
 
 # State
@@ -103,10 +105,13 @@ func stop_tracking_target():
 
 
 func _process(delta: float):
-	if not points:
-		# we haven't started tracking target at all
+	if points.size() < 2:
+		# We haven't started tracking target at all
 		# (or we have stopped and let all the old points be removed)
-		# so there is nothing to do, neither with old nor last point
+		# so there is nothing to do, neither with any old nor last point
+		# Note that there can never be only 1 point so we could also just check
+		# for points to be empty, but it's safer to check that we have at least
+		# 2 points for operations below
 		return
 
 	# Start applying smooth motion of oldest point after lifespan has passed,
@@ -145,8 +150,16 @@ func _get_relative_target_position():
 
 
 func _remove_oldest_point():
-	remove_point(0)
+	if points.size() > 2:
+		# At least 3 points, so there will be 2 left after removal, OK
+		remove_point(0)
 
-	# Update oldest_point_smooth_lerp_start_position to the next oldest
-	# point position
-	oldest_point_smooth_lerp_start_position = points[0]
+		# Update oldest_point_smooth_lerp_start_position to the next oldest
+		# point position
+		oldest_point_smooth_lerp_start_position = points[0]
+	else:
+		## Only 2 points (there should never be only 1), so the oldest point
+		## must have reached the 2nd oldest and also most recent point,
+		## so the trail is now reduced to a single point and there is no use
+		## keeping it, so clear all the points
+		clear_points()
