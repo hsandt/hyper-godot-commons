@@ -158,8 +158,11 @@ func _remove_oldest_point():
 		# point position
 		oldest_point_smooth_lerp_start_position = points[0]
 	else:
-		## Only 2 points (there should never be only 1), so the oldest point
-		## must have reached the 2nd oldest and also most recent point,
-		## so the trail is now reduced to a single point and there is no use
-		## keeping it, so clear all the points
+		# Only 2 points (there should never be only 1), so the oldest point
+		# must have reached the 2nd oldest and also most recent point,
+		# so the trail is now reduced to a single point and there is no use
+		# keeping it, so clear all the points. This will also stop processing
 		clear_points()
+
+		# To avoid leak, free trail node
+		queue_free()
