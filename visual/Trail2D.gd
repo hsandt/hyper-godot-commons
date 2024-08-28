@@ -99,8 +99,11 @@ func start_tracking_target(new_target: Node2D = null):
 
 
 ## Stop tracking target (without clearing target reference, in case we want to reuse it later)
+## - immediately stop first point lifespan timer so trail starts fading out already
+## - stop advance timer so we don't try to create more trail points
 func stop_tracking_target():
 	should_track_target = false
+	first_point_lifespan_timer.stop()
 	advance_to_next_floating_point_timer.stop()
 
 
