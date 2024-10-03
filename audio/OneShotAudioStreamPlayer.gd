@@ -2,10 +2,11 @@ class_name OneShotAudioStreamPlayer
 extends AudioStreamPlayer
 ## Subclass of AudioStreamPlayer that frees itself when audio stream has finished playing
 ## Also offers a utility method to play an audio stream
+## Generally used for one-shot SFX
 ##
 ## Usage:
 ## - create scene OneShotAudioStreamPlayer.tscn with one node with this script
-##   (the easiest is to copy OneShotAudioStreamPlayerTemplate.tscn)
+##   (the easiest is to copy/inherit from scene OneShotAudioStreamPlayerTemplate.tscn)
 ## - customize OneShotAudioStreamPlayer.tscn, in particular the Bus
 ##   to match the type of SFX to play on this instance
 ## - instantiate that scene at runtime and call play_audio_stream on it
