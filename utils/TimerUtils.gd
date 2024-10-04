@@ -2,15 +2,15 @@ class_name TimerUtils
 ## Util static functions for Timer nodes
 
 
-## Create a periodic physics timer with optional duration and optional callback
+## Create a periodic physics timer with optional interval and optional callback
 ## under given parent (often passing self), and return it
-## If no duration is passed, a dummy wait_time of 1.0 is assigned, so you must
-## make sure to always call timer.start passing a custom duration.
-static func create_periodic_physics_timer_under(parent: Node, duration: float = 1.0,
+## If no interval is passed, a dummy wait_time of 1.0 is assigned, so you must
+## make sure to always call timer.start passing a custom interval.
+static func create_periodic_physics_timer_under(parent: Node, interval: float = 1.0,
 		callback: Callable = Callable()) -> Timer:
 	var timer := Timer.new()
 	timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
-	timer.wait_time = duration
+	timer.wait_time = interval
 
 	# Callable is not nullable, so default is empty Callable() and check uses `is_valid`
 	if callback.is_valid():
