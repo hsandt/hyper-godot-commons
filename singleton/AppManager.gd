@@ -112,6 +112,11 @@ func _ready():
 	else:
 		if set_window_scale_on_start:
 			# Defer display change on game start to ensure it works
+			# Note that this only works when the Project Settings Viewport Width/Height
+			# are not bigger than the monitor usable rect dimensions. For pixel art games
+			# the native resolution is generally low enough, but for HD games it's better
+			# to set low viewport dimensions (such as 720p) + Camera Zoom to scale back up
+			# (this will preserve the correct camera preview in the scene view)
 			# Force update: true for initial window scale
 			set_window_scale_preset_index.call_deferred(initial_window_scale_preset_index, true)
 
