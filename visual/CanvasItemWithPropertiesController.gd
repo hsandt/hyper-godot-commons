@@ -9,22 +9,22 @@ extends CanvasItem
 
 ## When true, update material brightness to match state variable every frame
 ## When false, reset brightness
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var override_brightness: bool
 
 ## When override_brightness is true, this is used to update the shader material
 ## brightness parameter
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var target_brightness: float
 
 ## When true, update modulate to match state variable every frame
 ## When false, reset modulate
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var override_modulate: bool
 
 ## When override_modulate is true, this is used to update the shader material
 ## modulate
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var target_modulate: Color
 
 ## Timer used to change brightness for a given duration

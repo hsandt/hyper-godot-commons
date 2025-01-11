@@ -35,12 +35,12 @@ extends Node
 
 ## When true, update material brightness to match state variable every frame
 ## When false, reset brightness
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var override_brightness: bool
 
 ## When override_brightness is true, this is used to update the shader material
 ## brightness parameter
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var target_brightness: float
 
 ## Initial modulate to set
@@ -48,12 +48,12 @@ extends Node
 
 ## When true, update modulate to match state variable every frame
 ## When false, reset modulate
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var override_modulate: bool
 
 ## When override_modulate is true, this is used to update the shader material
 ## modulate
-## You can set this to true via code of animation
+## You can set this to true via code or animation
 @export var target_modulate: Color
 
 ## Timer used to change shader parameters for a given duration
@@ -145,7 +145,7 @@ func set_shader_brightness_on_all_canvas_items(new_brightness: float):
 	for cached_canvas_item in cached_canvas_items:
 		var shader_material := cached_canvas_item.material as ShaderMaterial
 		if shader_material:
-			shader_material.set_shader_parameter("brightness", target_brightness)
+			shader_material.set_shader_parameter("brightness", new_brightness)
 		else:
 			push_error("[ShaderParameterController] set_shader_brightness_on_all_canvas_items: canvas item '%s' has no ShaderMaterial assigned, " %
 					cached_canvas_item.get_path(),
