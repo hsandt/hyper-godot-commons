@@ -48,6 +48,7 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 		4.0,
 	]
 
+## (only used if set_window_scale_on_start is true)
 ## Index of window scale preset to use on game start, among window_scale_presets
 ## This replaces display/window/stretch/scale for projects when it causes issues
 ## (e.g. gives unwanted HUD anchors in editor or offsets HUD elements at runtime,
@@ -280,8 +281,6 @@ func set_window_scale_preset_index(new_preset_window_scale_index: int, force_upd
 
 
 func toggle_fullscreen():
-	var new_window_mode: DisplayServer.WindowMode
-
 	# For debug, borderless window is enough
 	if DisplayServer.window_get_mode() not in \
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
