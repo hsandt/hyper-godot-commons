@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://56d5cjiju2ql"]
 
-[ext_resource type="Script" path="res://addons/hyper-godot-commons/audio/SFXManager.gd" id="1_a268r"]
+[ext_resource type="Script" uid="uid://dlm8b6iv7kr2j" path="res://addons/hyper-godot-commons/audio/SFXManager.gd" id="1_a268r"]
 [ext_resource type="PackedScene" uid="uid://bfjj44f1wfnw1" path="res://addons/hyper-godot-commons/audio/OneShotAudioStreamPlayerTemplate.tscn" id="2_e3ilb"]
 [ext_resource type="PackedScene" uid="uid://qdwc5sj7k8x2" path="res://addons/hyper-godot-commons/audio/LoopingAudioStreamPlayerTemplate.tscn" id="3_nvu7q"]
 

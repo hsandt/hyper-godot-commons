@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dr8nyt3mnijkp"]
 
-[ext_resource type="Script" path="res://addons/hyper-godot-commons/singleton/TransitionScreen.gd" id="1_hnan5"]
+[ext_resource type="Script" uid="uid://dkl1yv4i1kdgy" path="res://addons/hyper-godot-commons/singleton/TransitionScreen.gd" id="1_hnan5"]
 [ext_resource type="AnimationLibrary" uid="uid://d24br0dr75gjg" path="res://addons/hyper-godot-commons/singleton/transition_screen_template_animation_library.tres" id="2_ti62w"]
 
 [node name="TransitionScreenTemplate" type="CanvasLayer" node_paths=PackedStringArray("animation_player")]

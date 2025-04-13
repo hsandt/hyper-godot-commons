@@ -47,7 +47,7 @@ tracks/0/keys = {
 
 [resource]
 _data = {
-"RESET": SubResource("Animation_eg3qi"),
-"fade_in": SubResource("Animation_qy2tf"),
-"fade_out": SubResource("Animation_hwnoq")
+&"RESET": SubResource("Animation_eg3qi"),
+&"fade_in": SubResource("Animation_qy2tf"),
+&"fade_out": SubResource("Animation_hwnoq")
 }
