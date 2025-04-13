@@ -208,6 +208,9 @@ func get_native_window_size() -> Vector2i:
 
 
 func set_window_scale(scale: float):
+	if Engine.is_embedded_in_editor():
+		return
+
 	# Set new window size using scale
 	# Note that Vector2i(Vector2) truncates fractional part
 	var new_window_size := Vector2i(scale * get_native_window_size())
