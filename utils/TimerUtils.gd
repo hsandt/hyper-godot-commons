@@ -29,3 +29,12 @@ static func create_one_shot_physics_timer_under(parent: Node, duration: float = 
 	var timer := create_periodic_physics_timer_under(parent, duration, callback)
 	timer.one_shot = true
 	return timer
+
+
+## Create a SceneTreeTimer using physics time, and return its timeout signal (to be awaited)
+## We need context_node to call `get_tree()`, but any node will do, so just pass `self`
+## (when calling this method from a Node script)
+## Usage:
+## `await TimerUtils.physics_timeout(self, time_sec)`
+static func physics_timeout(context_node: Node, time_sec: float) -> Signal:
+	return context_node.get_tree().create_timer(time_sec, false, true).timeout
