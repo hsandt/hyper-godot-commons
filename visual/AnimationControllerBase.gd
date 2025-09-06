@@ -42,6 +42,9 @@ extends Node
 ##   owner state, and possibly previous animation
 ## - implement _on_animation_finished to process animation ends
 ##   and handle transitions
+## - in the model class (e.g. MyCharacter) instance, add a member to refer to this subclass instance
+##   `@export var animation_controller: MyAnimationController`
+##   and use its API to control animations, starting with `play_animation`
 
 ## Own signal to notify when an animation finished, agnostic of AnimationMixer type
 ## When using animation tree and traveling through multiple animation nodes,
@@ -73,10 +76,13 @@ var state_machine_last_travel_request: StringName
 ## The name of the current override animation, or &"" is none
 var override_animation: StringName
 
+## If true, do not try to play base animation in _physics_process
+var is_paused: bool
+
 
 func _ready():
 	initialize()
-	# Do not call setup, as this script is managed by master script `HeroBase`
+	setup()
 
 
 func initialize():
@@ -105,9 +111,13 @@ func initialize():
 func setup():
 	state_machine_last_travel_request = &""
 	clear_any_override_animation()
+	is_paused = false
 
 
 func _physics_process(_delta: float):
+	if is_paused:
+		return
+
 	# If an override animation is active, do not compute the base animation
 	# and keep the override animation until it is over
 	if override_animation:
@@ -205,6 +215,36 @@ func play_animation(animation_name: StringName):
 		#   multiple nodes, this will ignore intermediate nodes (animation_name is just the new
 		#   target animation)
 		_on_animation_changed(last_animation, animation_name)
+
+
+## Pause current animation
+func pause_animation():
+	if is_paused:
+		push_warning("[AnimationControllerBase] pause_animation: animation controller '%s' is already paused, STOP" %
+			get_path())
+		return
+
+	if animation_tree:
+		animation_tree.process_mode = Node.PROCESS_MODE_DISABLED
+	else:
+		animation_player.pause()
+
+	is_paused = true
+
+
+## Resume current animation
+func resume_animation():
+	if not is_paused:
+		push_warning("[AnimationControllerBase] resume_animation: animation controller '%s' is not paused, STOP" %
+			get_path())
+		return
+
+	if animation_tree:
+		animation_tree.process_mode = Node.PROCESS_MODE_INHERIT
+	else:
+		animation_player.play()
+
+	is_paused = false
 
 
 ## Play an animation as override
