@@ -1,4 +1,5 @@
 # Hyper Godot Commons
+
 A collection of utility scripts for Godot 4
 
 It is the equivalent of my other utility repository, [Hyper Unity Commons](https://github.com/hsandt/hyper-unity-commons), for Godot.
@@ -15,11 +16,18 @@ However, if you found some scripts that would benefit your project in this repos
 
 Because scripts are under active development, I recommend people who want to use them but who are not working with me to either:
 
-a. clone this repository as submodule, but stick to a certain commit for a given project (or at least pull new commits carefully, paying attention to those flagged "! API BREAKING !")
-
+a. clone this repository as submodule, but stick to a certain commit for a given project (or at least pull new commits carefully, paying attention to those flagged "! API BREAKING !"). See [Clone as submodule](#clone-as-submodule).
 b. download and copy individual scripts to your project (copy the LICENSE along and indicate any changes you did)
 
-Note that you can clone/copy the repository content to any project subfolder, including the `addons` folder. This repository is not an addon (it has no `plugin.cfg` file) so it won't need to be Enabled even if it is placed under the `addons` folder.
+### Clone as submodule
+
+1. Clone this repository as submodule in relative path addons/hyper-godot-commons
+2. Enable Hyper Godot Commons in the Project Settings > Plugins tab
+
+Note that despite not being an official Godot add-on, this repository has a `plugin.cfg` and `plugin.gd` files like an add-on, as a workaround to allow `class_name` registration (see https://github.com/godotengine/godot/issues/30048).
+In fact, step 2 is only needed to register classes by name and quickly create nodes with those classes.
+
+In addition, this repository doesn't follow the [addon repository structure](https://github.com/Calinou/godot-addon-template) so that it may be directly added as submodule to your project (without an unwanted extra addons/ subfolder).
 
 ## Test
 
@@ -38,10 +46,10 @@ Improvement suggestions and bug reports are welcome in the [Issues](https://gith
 ### Audio
 
 - [OneShotAudioStreamPlayer](audio/OneShotAudioStreamPlayer.gd) + template scene: Subclass of AudioStreamPlayer that frees itself when audio stream has finished playing
-    - `play_audio_stream`
+	- `play_audio_stream`
 
 - [SFXManager](audio/SFXManager.gd) + template scene: A manager class to easily spawn one-shot SFX
-    - `spawn_sfx`
+	- `spawn_sfx`
 
 ### Singleton
 
@@ -56,22 +64,20 @@ Improvement suggestions and bug reports are welcome in the [Issues](https://gith
 ### Utils
 
 - [CanvasItemUtils](utils/CanvasItemUtils.gd)
-    - `get_absolute_z_index`: Return the absolute Z index of a CanvasItem
+	- `get_absolute_z_index`: Return the absolute Z index of a CanvasItem
 
 - [DebugUtils](utils/DebugUtils.gd)
-    - `assert_member_is_set`: Assert that member is set on context
+	- `assert_member_is_set`: Assert that member is set on context
 
 - [MathEnums](utils/MathEnums.gd)
 - [MathUtils](utils/MathUtils.gd)
-    - `exclusive_randf`: Return a random float in [0; 1)
-    - `is_cardinal_direction_horizontal`: Return true if passed cardinal direction is horizontal, false if vertical
-    - `horizontal_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero horizontal axis value
-    - `vertical_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero vertical axis value
-    - `cardinal_direction_to_unit_vector2i`: Return unit Vector2i corresponding to cardinal direction
+	- `exclusive_randf`: Return a random float in [0; 1)
+	- `is_cardinal_direction_horizontal`: Return true if passed cardinal direction is horizontal, false if vertical
+	- `horizontal_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero horizontal axis value
+	- `vertical_axis_value_to_cardinal_direction`: Return the cardinal direction corresponding to a non-zero vertical axis value
+	- `cardinal_direction_to_unit_vector2i`: Return unit Vector2i corresponding to cardinal direction
 
 - [NodeUtils](utils/NodeUtils.gd)
-    - `queue_free_children`: Call queue free on all children of node
-    - `instantiate_under`: Instantiate a packed scene under a parent
-    - `instantiate_under_at`: Instantiate a packed scene under a parent at a global position
-
-
+	- `queue_free_children`: Call queue free on all children of node
+	- `instantiate_under`: Instantiate a packed scene under a parent
+	- `instantiate_under_at`: Instantiate a packed scene under a parent at a global position
