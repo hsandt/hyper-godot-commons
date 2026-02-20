@@ -3,9 +3,12 @@ extends CanvasLayer
 ##
 ## Usage:
 ## - create scene TransitionScreen.tscn and register it as autoload singleton scene
-##   (the easiest is to copy TransitionScreenTemplate.tscn, and also re-save the associated
-##   animation library transition_screen_template_animation_library.tres as
-##   some custom res in the same game project folder to avoid resource sharing)
+##   (the easiest is to copy TransitionScreenTemplate.tscn as TransitionTemplate.tscn
+##   in some game project folder, and also re-save the associated animation library
+##   as some custom resource to avoid resource sharing:
+##   AnimationPlayer > Animation tab > Animation top button > Manage Animations... >
+##   Storage > transition_screen_template_animation_library.tres > Save button >
+##   Save As > transition_screen_animation_library.tres in the same game project folder)
 ##
 ## If you use a custom TransitionScreen, add an AnimationPlayer to it with RESET,
 ## fade_in and fade_out animations.
