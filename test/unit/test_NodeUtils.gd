@@ -60,4 +60,4 @@ func test_set_flip_x_true():
 
 	assert_eq(node.scale.y, -1.0)
 	assert_almost_eq(node.rotation, PI, 1e-7)
-	assert_eq(node.rotation_degrees, 180)
+	assert_eq(node.rotation_degrees, 180.0)
