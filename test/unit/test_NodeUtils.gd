@@ -5,16 +5,19 @@ const test_empty_scene2d = preload("res://addons/hyper-godot-commons/test/scenes
 
 
 func test_queue_free_children():
+	# Create intermediate parent to call `queue_free_children` on, this GutTest instance `self` uses
+	# an Awaiter node that we must absolutely not free to avoid error:
+	# "Attempt to call function 'queue_free' in base 'previously freed' on a null instance."
+	var parent := Node2D.new()
+	add_child_autofree(parent)
+	
 	var node1 := Node2D.new()
 	var node2 := Node2D.new()
-	add_child_autofree(node1)
-	add_child_autofree(node2)
+	parent.add_child(node1)
+	parent.add_child(node2)
 
-	# Since add_child_autofree add nodes to self (the test node),
-	# pass self to queue_free_children
-	# (never work directly on root node, since GutRunner is a child of root)
-	NodeUtils.queue_free_children(self)
-
+	NodeUtils.queue_free_children(parent)
+		
 	assert_true(node1.is_queued_for_deletion())
 	assert_true(node2.is_queued_for_deletion())
 
