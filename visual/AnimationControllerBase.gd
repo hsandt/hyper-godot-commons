@@ -315,5 +315,5 @@ func _process_animation_finished(_anim_name: StringName):
 ## Process change of target animation
 ## - when using AnimationPlayer, this is the assigned animation
 ## - when using AnimationTree, this is current node animation
-func _on_animation_changed(last_animation: StringName, animation_name: StringName):
+func _on_animation_changed(_last_animation: StringName, _animation_name: StringName):
 	pass
