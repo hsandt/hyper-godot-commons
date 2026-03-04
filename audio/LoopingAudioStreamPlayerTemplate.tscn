@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://qdwc5sj7k8x2"]
+[gd_scene format=3 uid="uid://qdwc5sj7k8x2"]
 
 [ext_resource type="Script" uid="uid://brmo3ovf83dv2" path="res://addons/hyper-godot-commons/audio/LoopingAudioStreamPlayer.gd" id="1_4kwu3"]
 
-[node name="LoopingAudioStreamPlayer" type="AudioStreamPlayer"]
+[node name="LoopingAudioStreamPlayer" type="AudioStreamPlayer" unique_id=1102454027]
 script = ExtResource("1_4kwu3")
