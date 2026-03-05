@@ -26,11 +26,5 @@ func stop_and_free():
 
 func fade_out_and_free(duration: float):
 	var tween := create_tween()
-	# Note: tween DB is enough, if you really want to tween linearly,
-	# use tween_method with a custom method that sets volume_db using linear_to_db
-	tween.tween_property(self, ^"volume_db", -80.0, duration)
-	await tween.finished
-	queue_free()
-
-
-# TODO: add fade_out_and_free me by tweening audio volume
+	tween.tween_property(self, ^"volume_linear", 0.0, duration)
+	tween.tween_callback(queue_free)
