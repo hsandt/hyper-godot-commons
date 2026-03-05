@@ -11,6 +11,9 @@ extends Node
 ## AudioStreamPlayer responsible for playing music
 @export var music_stream_player: AudioStreamPlayer
 
+## Default duration of music fade out (s)
+@export var default_fade_out_duration: float = 1.0
+
 ## True when music is muted
 var is_music_muted: bool = false
 
@@ -26,6 +29,12 @@ func play_music(music_stream: AudioStream):
 
 	music_stream_player.stream = music_stream
 	music_stream_player.play()
+
+
+func fade_out(duration: float = default_fade_out_duration):
+	var tween := create_tween()
+	tween.tween_property(music_stream_player, ^"volume_linear", 0.0, duration)
+	tween.tween_callback(music_stream_player.stop)
 
 
 func toggle_music():
