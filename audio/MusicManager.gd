@@ -22,13 +22,14 @@ func _ready():
 	DebugUtils.assert_member_is_set(self, music_stream_player, "music_stream_player")
 
 
-func play_music(music_stream: AudioStream):
+func play_music(music_stream: AudioStream, force_restart_if_same: bool = false):
 	if not music_stream:
 		push_error("music_stream is null")
 		return
 
-	music_stream_player.stream = music_stream
-	music_stream_player.play()
+	if music_stream_player.stream != music_stream or force_restart_if_same:
+		music_stream_player.stream = music_stream
+		music_stream_player.play()
 
 
 func fade_out(duration: float = default_fade_out_duration):
