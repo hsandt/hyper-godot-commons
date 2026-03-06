@@ -27,7 +27,9 @@ func play_music(music_stream: AudioStream, force_restart_if_same: bool = false):
 		push_error("music_stream is null")
 		return
 
-	if music_stream_player.stream != music_stream or force_restart_if_same:
+	if not music_stream_player.playing \
+			or music_stream_player.stream != music_stream \
+			or force_restart_if_same:
 		music_stream_player.stream = music_stream
 		music_stream_player.play()
 
