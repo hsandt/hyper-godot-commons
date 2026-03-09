@@ -8,6 +8,14 @@ static func queue_free_children(node: Node):
 		child.queue_free()
 
 
+## Create a new Node2D with given name and add it under parent
+static func create_node2d_under(name: StringName, parent: Node) -> Node2D:
+	var node2d = Node2D.new()
+	node2d.name = name
+	parent.add_child(node2d)
+	return node2d
+
+
 ## Instantiate a packed scene under a parent
 ## In editor and debug exports, force readable name (slow operation)
 static func instantiate_under(packed_scene: PackedScene, parent: Node) -> Node:

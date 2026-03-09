@@ -10,16 +10,23 @@ func test_queue_free_children():
 	# "Attempt to call function 'queue_free' in base 'previously freed' on a null instance."
 	var parent := Node2D.new()
 	add_child_autofree(parent)
-	
+
 	var node1 := Node2D.new()
 	var node2 := Node2D.new()
 	parent.add_child(node1)
 	parent.add_child(node2)
 
 	NodeUtils.queue_free_children(parent)
-		
+
 	assert_true(node1.is_queued_for_deletion())
 	assert_true(node2.is_queued_for_deletion())
+
+func test_create_node2d_under():
+	var node2d := NodeUtils.create_node2d_under("test_node2d", get_tree().root)
+	autofree(node2d)
+
+	assert_eq(node2d.get_parent(), get_tree().root)
+	assert_eq(node2d.name, "test_node2d")
 
 func test_instantiate_under():
 	var instance := NodeUtils.instantiate_under(test_empty_scene2d, get_tree().root)
