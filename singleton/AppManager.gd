@@ -34,6 +34,8 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 
 @export_group("Parameters")
 
+## ! This doesn't work since native editor window position and size restoration has been implemented
+## ! https://github.com/godotengine/godot-proposals/issues/8358
 ## If true, window scale will be initialized following the preset index
 ## initial_window_scale_preset_index
 ## Even when false, the list of window_scale_presets will be used when
@@ -257,6 +259,11 @@ func change_resolution(delta: int):
 			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
 		push_warning("[AppManager] change_resolution: Window is currently fullscreen, ",
 			"don't do anything to avoid glitchy attempt to resize window while stuck in fullscreen")
+		return
+
+	var window_scale_presets_count := cached_valid_window_scale_presets.size()
+	if window_scale_presets_count == 0:
+		push_error("[AppManager] change_resolution: cached_valid_window_scale_presets is empty, STOP")
 		return
 
 	var new_preset_window_scale_index := (current_window_scale_preset_index + delta) % \
