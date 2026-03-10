@@ -50,7 +50,7 @@ var was_overriding_modulate: bool
 
 ## Shader Material
 ## Each entity should have its own material instance
-## If you share the same material via scene inheritance or resource reference,
+## If you share the same material via scene inheritance, scene instantiation or resource reference,
 ## make sure to check Material > Resource > Local to Scene so it auto-generates
 ## unique instances (even at edit time)
 @onready var shader_material = material as ShaderMaterial
@@ -70,6 +70,9 @@ func initialize():
 	if shader_material:
 		initial_brightness = shader_material.get_shader_parameter("brightness")
 		initial_modulate = modulate
+	else:
+		push_warning("Could not find shader material on %s, setting brightness/modulate will do nothing" %
+			get_path())
 
 func setup():
 	override_brightness = false
