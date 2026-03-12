@@ -41,7 +41,7 @@ func fade_out(duration: float = default_fade_out_duration):
 
 
 func toggle_music():
-	var music_bus_index := AudioServer.get_bus_index(&"BGM")
+	var music_bus_index := AudioServer.get_bus_index(music_stream_player.bus)
 	var new_linear_volume := 1.0 if is_music_muted else 0.0
 	AudioServer.set_bus_volume_db(music_bus_index, linear_to_db(new_linear_volume))
 	is_music_muted = !is_music_muted
