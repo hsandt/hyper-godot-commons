@@ -31,13 +31,20 @@ func play_music(music_stream: AudioStream, force_restart_if_same: bool = false):
 			or music_stream_player.stream != music_stream \
 			or force_restart_if_same:
 		music_stream_player.stream = music_stream
+		# Make sure to restore volume in case we called fade_out before
+		music_stream_player.volume_linear = 1.0
 		music_stream_player.play()
 
 
-func fade_out(duration: float = default_fade_out_duration):
+func stop_music():
+	music_stream_player.stop()
+
+
+func fade_out(duration: float = default_fade_out_duration) -> Tween:
 	var tween := create_tween()
 	tween.tween_property(music_stream_player, ^"volume_linear", 0.0, duration)
 	tween.tween_callback(music_stream_player.stop)
+	return tween
 
 
 func toggle_music():
