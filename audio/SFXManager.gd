@@ -41,12 +41,14 @@ func _ready():
 	DebugUtils.assert_member_is_set(self, sfx_parent, "sfx_parent")
 
 
-## Spawn SFX by instantiating OneShotAudioStreamPlayer and let it free itself when finished
-func spawn_sfx(audio_stream: AudioStream):
+## Spawn SFX by instantiating OneShotAudioStreamPlayer that frees itself when finished, and return it
+## so caller can wait for finished signal if needed
+func spawn_sfx(audio_stream: AudioStream) -> OneShotAudioStreamPlayer:
 	assert(audio_stream != null, "SFXManager.spawn_sfx: expected audio_stream")
 
 	var one_shot_audio_stream_player: OneShotAudioStreamPlayer = NodeUtils.instantiate_under(one_shot_audio_stream_player_prefab, sfx_parent)
 	one_shot_audio_stream_player.play_audio_stream(audio_stream)
+	return one_shot_audio_stream_player
 
 
 ## Spawn SFX by instantiating OneShotAudioStreamPlayer and return it so caller
