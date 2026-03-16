@@ -17,9 +17,16 @@ extends Node
 ## True when music is muted
 var is_music_muted: bool = false
 
+## Current volume tween, if any
+var volume_tween: Tween
+
 
 func _ready():
 	DebugUtils.assert_member_is_set(self, music_stream_player, "music_stream_player")
+
+
+func is_playing() -> bool:
+	return music_stream_player.playing
 
 
 func play_music(music_stream: AudioStream, force_restart_if_same: bool = false):
@@ -32,6 +39,9 @@ func play_music(music_stream: AudioStream, force_restart_if_same: bool = false):
 			or force_restart_if_same:
 		music_stream_player.stream = music_stream
 		# Make sure to restore volume in case we called fade_out before
+		if volume_tween:
+			volume_tween.kill()
+			volume_tween = null
 		music_stream_player.volume_linear = 1.0
 		music_stream_player.play()
 
@@ -41,10 +51,10 @@ func stop_music():
 
 
 func fade_out(duration: float = default_fade_out_duration) -> Tween:
-	var tween := create_tween()
-	tween.tween_property(music_stream_player, ^"volume_linear", 0.0, duration)
-	tween.tween_callback(music_stream_player.stop)
-	return tween
+	volume_tween = create_tween()
+	volume_tween.tween_property(music_stream_player, ^"volume_linear", 0.0, duration)
+	volume_tween.tween_callback(music_stream_player.stop)
+	return volume_tween
 
 
 func toggle_music():
