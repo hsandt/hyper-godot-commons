@@ -31,10 +31,26 @@ static func create_one_shot_physics_timer_under(parent: Node, duration: float = 
 	return timer
 
 
-## Create a SceneTreeTimer using physics time, and return its timeout signal (to be awaited)
+## Helper method for visual_timeout and physics_timeout
+static func _timeout(context_node: Node, time_sec: float, process_in_physics: bool) -> Signal:
+	return context_node.get_tree().create_timer(time_sec, false, process_in_physics).timeout
+
+
+## Create a SceneTreeTimer that pauses with scene tree, uses scaled process (visual) time,
+## and return its timeout signal (to be awaited)
+## We need context_node to call `get_tree()`, but any node will do, so just pass `self`
+## (when calling this method from a Node script)
+## Usage:
+## `await TimerUtils.visual_timeout(self, time_sec)`
+static func visual_timeout(context_node: Node, time_sec: float) -> Signal:
+	return _timeout(context_node, time_sec, false)
+
+
+## Create a SceneTreeTimer that pauses with scene tree, uses scaled physics time,
+## and return its timeout signal (to be awaited)
 ## We need context_node to call `get_tree()`, but any node will do, so just pass `self`
 ## (when calling this method from a Node script)
 ## Usage:
 ## `await TimerUtils.physics_timeout(self, time_sec)`
 static func physics_timeout(context_node: Node, time_sec: float) -> Signal:
-	return context_node.get_tree().create_timer(time_sec, false, true).timeout
+	return _timeout(context_node, time_sec, true)
