@@ -34,11 +34,14 @@ static func instantiate_under_deferred(packed_scene: PackedScene, parent: Node) 
 
 
 ## Instantiate a packed scene under a parent at a global position
+## The position is set *before* add_child to avoid spawning at an unwanted position (generally Vector2.ZERO).
+## While instantly changed for next frame, it could be used during _ready and detected by collision areas
+## (which may take up to 2 frames to take last node move into account)
 ## In editor and debug exports, force readable name (slow operation)
 static func instantiate_under_at(packed_scene: PackedScene, parent: Node, global_position: Vector2) -> Node:
 	var instance := packed_scene.instantiate()
-	parent.add_child(instance, OS.has_feature("debug"))
 	instance.global_position = global_position
+	parent.add_child(instance, OS.has_feature("debug"))
 	return instance
 
 
@@ -47,8 +50,8 @@ static func instantiate_under_at(packed_scene: PackedScene, parent: Node, global
 ## In editor and debug exports, force readable name (slow operation)
 static func instantiate_under_at_deferred(packed_scene: PackedScene, parent: Node, global_position: Vector2) -> Node:
 	var instance := packed_scene.instantiate()
-	parent.add_child.call_deferred(instance, OS.has_feature("debug"))
 	instance.global_position = global_position
+	parent.add_child.call_deferred(instance, OS.has_feature("debug"))
 	return instance
 
 
