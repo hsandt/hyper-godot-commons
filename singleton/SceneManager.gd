@@ -24,10 +24,9 @@ func reload_current_scene_with_fade_async(fade_out_speed: float = 1.0, fade_in_s
 
 ## Change scene safely at the end of the frame
 func change_scene(new_scene: PackedScene):
-	# Following the example in
-	# https://docs.godotengine.org/en/latest/tutorials/scripting/singletons_autoload.html
-	# we defer changing scene to avoid deleting nodes required by code currently running
-	_change_scene_immediate.call_deferred(new_scene)
+	# No need to defer call since the native change_scene methods already defer current scene node
+	# deletion to end of frame
+	_change_scene_immediate(new_scene)
 
 
 ## Change scene with fade out screen and back in
