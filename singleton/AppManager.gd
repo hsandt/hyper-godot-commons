@@ -89,9 +89,6 @@ var cached_valid_window_scale_presets: Array[float]
 ## Current index of window scale among array of presets
 var current_window_scale_preset_index: int
 
-## Current frame counter
-var current_frame: int
-
 
 func _ready():
 	# Autoload singletons are placed at the top of the scene tree
@@ -128,8 +125,6 @@ func _ready():
 		# Else, hide debug overlay until user toggles visibility with debug input
 		debug_overlay.visible = OS.has_feature("debug") and debug_show_debug_overlay_on_start
 
-	current_frame = 0
-
 
 func _unhandled_input(event: InputEvent):
 	# let user toggle hi-dpi resolution freely
@@ -159,10 +154,6 @@ func _unhandled_input(event: InputEvent):
 	if _is_exact_action_pressed_in_event_safe(event, &"app_exit"):
 		get_tree().quit()
 		get_viewport().set_input_as_handled()
-
-
-func _physics_process(_delta: float):
-	current_frame += 1
 
 
 func _process(_delta: float):
