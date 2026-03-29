@@ -63,8 +63,9 @@ signal fullscreen_toggled(new_window_mode: DisplayServer.WindowMode)
 ## Note: it takes precedence over auto_scale on PC template
 @export var auto_fullscreen_in_pc_template: bool = false
 
-## If true, hide cursor when fullscreen is enabled
-@export var hide_cursor_during_fullscreen: bool = false
+## If true, set mouse cursor mode dynamically according to _windowed_cursor_mode
+## and _fullscreen_cursor_mode
+@export var update_cursor_mode: bool = false
 
 ## (Debug only) If true, show the debug overlay on start, else hide it
 @export var debug_show_debug_overlay_on_start: bool = false
@@ -89,6 +90,16 @@ var cached_valid_window_scale_presets: Array[float]
 ## Current index of window scale among array of presets
 var current_window_scale_preset_index: int
 
+## Mouse cursor mode to follow when game is windowed
+## Set it via set_cursor_modes to properly update cursor
+## Only used if update_cursor_mode is true
+var _windowed_cursor_mode: DisplayServer.MouseMode = DisplayServer.MouseMode.MOUSE_MODE_VISIBLE
+
+## Mouse cursor mode to follow when game is in fullscreen
+## Set it via set_cursor_modes to properly update cursor
+## Only used if update_cursor_mode is true
+var _fullscreen_cursor_mode: DisplayServer.MouseMode = DisplayServer.MouseMode.MOUSE_MODE_VISIBLE
+
 
 func _ready():
 	# Autoload singletons are placed at the top of the scene tree
@@ -103,9 +114,8 @@ func _ready():
 	cached_screen_usable_rect_size = DisplayServer.screen_get_usable_rect().size
 	update_cached_valid_window_scale_presets()
 
-	if DisplayServer.window_get_mode() not in \
-			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN] and \
-			auto_fullscreen_in_pc_template and OS.has_feature("pc") and OS.has_feature("template"):
+	if not is_fullscreen_enabled() and auto_fullscreen_in_pc_template and \
+			OS.has_feature("pc") and OS.has_feature("template"):
 		print("[AppManager] Playing standalone game with auto-fullscreen ON, enabling fullscreen")
 		# Defer display change on game start to ensure it works
 		toggle_fullscreen.call_deferred()
@@ -246,8 +256,7 @@ func set_window_scale(scale: float):
 
 
 func change_resolution(delta: int):
-	if DisplayServer.window_get_mode() in \
-			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
+	if is_fullscreen_enabled():
 		push_warning("[AppManager] change_resolution: Window is currently fullscreen, ",
 			"don't do anything to avoid glitchy attempt to resize window while stuck in fullscreen")
 		return
@@ -281,10 +290,14 @@ func set_window_scale_preset_index(new_preset_window_scale_index: int, force_upd
 			"expected 0 <= index < %d" % cached_valid_window_scale_presets.size())
 
 
+func is_fullscreen_enabled():
+	return DisplayServer.window_get_mode() in \
+			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]
+
+
 func toggle_fullscreen():
 	# For debug, borderless window is enough
-	if DisplayServer.window_get_mode() not in \
-			[DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
+	if not is_fullscreen_enabled():
 		_enable_fullscreen()
 	else:
 		_disable_fullscreen()
@@ -304,8 +317,9 @@ func _enable_fullscreen():
 	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		return
 
-	if hide_cursor_during_fullscreen:
-		DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_HIDDEN)
+	if update_cursor_mode:
+		# Update mouse mode for fullscreen
+		DisplayServer.mouse_set_mode(_fullscreen_cursor_mode)
 
 	print("[AppManager] Toggle fullscreen: WINDOW_MODE_EXCLUSIVE_FULLSCREEN")
 
@@ -318,8 +332,9 @@ func _disable_fullscreen():
 	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED:
 		return
 
-	if hide_cursor_during_fullscreen:
-		DisplayServer.mouse_set_mode(DisplayServer.MOUSE_MODE_VISIBLE)
+	if update_cursor_mode:
+		# Update mouse mode for windowed
+		DisplayServer.mouse_set_mode(_windowed_cursor_mode)
 
 	print("[AppManager] Toggle fullscreen: WINDOW_MODE_WINDOWED")
 
@@ -332,6 +347,19 @@ func _disable_fullscreen():
 	set_window_scale_preset_index(current_window_scale_preset_index, true)
 
 	fullscreen_toggled.emit(DisplayServer.WINDOW_MODE_WINDOWED)
+
+
+func set_cursor_modes(new_windowed_cursor_mode: DisplayServer.MouseMode,
+		new_fullscreen_cursor_mode: DisplayServer.MouseMode):
+	_windowed_cursor_mode = new_windowed_cursor_mode
+	_fullscreen_cursor_mode = new_fullscreen_cursor_mode
+
+	if update_cursor_mode:
+		# Update mouse mode to match current windowed/fullscreen state
+		if is_fullscreen_enabled():
+			DisplayServer.mouse_set_mode(_fullscreen_cursor_mode)
+		else:
+			DisplayServer.mouse_set_mode(_windowed_cursor_mode)
 
 
 func toggle_debug_overlay():
