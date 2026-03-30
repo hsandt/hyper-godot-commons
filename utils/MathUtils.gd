@@ -28,6 +28,19 @@ static func horizontal_direction_to_sign(horizontal_direction: MathEnums.Horizon
 			return 0
 
 
+## Return horizontal direction corresponding to X value
+## If x is zero, return fallback_direction
+static func x_to_horizontal_direction(x: float,
+		fallback_direction: MathEnums.HorizontalDirection) -> MathEnums.HorizontalDirection:
+	match x:
+		_ when x < 0:
+			return MathEnums.HorizontalDirection.LEFT
+		_ when x > 0:
+			return MathEnums.HorizontalDirection.RIGHT
+		_:
+			return fallback_direction
+
+
 ## Return Vector2i corresponding to horizontal direction
 static func horizontal_direction_to_unit_vector2i(horizontal_direction: MathEnums.HorizontalDirection) -> Vector2i:
 	match horizontal_direction:

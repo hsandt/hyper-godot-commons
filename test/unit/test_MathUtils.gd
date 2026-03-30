@@ -12,6 +12,18 @@ func test_horizontal_direction_to_sign_assert_right_gives_minus_1():
 func test_horizontal_direction_to_sign_assert_right_gives_1():
 	assert_eq(MathUtils.horizontal_direction_to_sign(MathEnums.HorizontalDirection.RIGHT), 1)
 
+func test_x_to_horizontal_direction_assert_minus_1_fallback_right_gives_left():
+	assert_eq(MathUtils.x_to_horizontal_direction(-1.0, MathEnums.HorizontalDirection.RIGHT), MathEnums.HorizontalDirection.LEFT)
+
+func test_x_to_horizontal_direction_assert_1_fallback_left_gives_right():
+	assert_eq(MathUtils.x_to_horizontal_direction(1.0, MathEnums.HorizontalDirection.LEFT), MathEnums.HorizontalDirection.RIGHT)
+
+func test_x_to_horizontal_direction_assert_0_fallback_left_gives_left():
+	assert_eq(MathUtils.x_to_horizontal_direction(0.0, MathEnums.HorizontalDirection.LEFT), MathEnums.HorizontalDirection.LEFT)
+
+func test_x_to_horizontal_direction_assert_0_fallback_right_gives_right():
+	assert_eq(MathUtils.x_to_horizontal_direction(0.0, MathEnums.HorizontalDirection.RIGHT), MathEnums.HorizontalDirection.RIGHT)
+
 func test_horizontal_direction_to_unit_vector2i_assert_left_gives_vector_left():
 	assert_eq(MathUtils.horizontal_direction_to_unit_vector2i(MathEnums.HorizontalDirection.LEFT), Vector2i.LEFT)
 
