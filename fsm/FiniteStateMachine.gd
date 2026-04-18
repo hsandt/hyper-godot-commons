@@ -6,6 +6,9 @@ extends Node
 ## - Add it under an owner entity node and reference it as state_machine
 ## - In owner entity script, call state_machine.initialize() once on start,
 ##   and state_machine.setup() on start and on every reset
+## - In owner entity script's _physics_process(), call state_machine._check_next_state()
+##   to apply change state request, then call state_machine.on_physics_process(delta)
+##   to process the current state
 ## - Create derived classes of FiniteState to define state behaviors,
 ##   and add instances of them under this node
 ## - Call change_state_by_name to set the initial state, then later,
@@ -95,8 +98,8 @@ func get_state_by_name(state_name: StringName) -> FiniteState:
 	var state = states_dict.get(state_name) as FiniteState
 
 	if not state:
-		push_error("%s: get_state_by_name: state_name '%s' is not in states_dict keys" %
-			[name, state_name])
+		push_error("%s: state_name '%s' is not in states_dict keys" %
+			[get_path(), state_name])
 
 	return state
 
@@ -135,17 +138,17 @@ func set_next_state_by_name(next_state_name: StringName, allow_restart: bool = f
 
 	if not found_next_state:
 		push_error("%s: next_state_name '%s' is not in states_dict keys. STOP." %
-			[name, next_state_name])
+			[get_path(), next_state_name])
 		return null
 
 	if current_state == found_next_state and not allow_restart:
 		push_warning("%s: already in state '%s' and allow_restart is false. STOP." %
-				[name, next_state_name])
+				[get_path(), next_state_name])
 		return null
 
 	if next_state_queries and priority == 0:
 		push_warning("%s: set_next_state_by_name('%s', %s, 0): next_state_queries already contains '%d' entrie(s) with state names:\n%s\n" %
-				[name, next_state_name, allow_restart, next_state_queries.size(),
+				[get_path(), next_state_name, allow_restart, next_state_queries.size(),
 					next_state_queries.map(func(query: NextFiniteStateQuery): return query.to_simplified_string())],
 			"but priority is 0. Consider setting a priority to avoid relying on query order. ")
 
@@ -185,7 +188,7 @@ func _check_next_state():
 				max_priority_found = query.priority
 				selected_query = query
 		if not selected_query:
-			push_error("no query had priority > MathConstants.INT64_MIN, STOP")
+			push_error("%s: no query had priority > MathConstants.INT64_MIN, STOP" % get_path())
 			return
 
 	var found_next_state = states_dict.get(selected_query.next_state_name) as FiniteState
@@ -231,7 +234,7 @@ func has_active_tag(tag: StringName) -> bool:
 func add_active_tag(tag: StringName):
 	var tag_index := active_tags.find(tag)
 	if tag_index >= 0:
-		push_warning("tag '%s' is already active, " % tag,
+		push_warning("%s: tag '%s' is already active, " % [get_path(), tag],
 			"so we are not re-adding the tag to avoid unsupported redundant tags, STOP")
 		return
 
@@ -241,7 +244,7 @@ func add_active_tag(tag: StringName):
 func remove_active_tag(tag: StringName):
 	var tag_index := active_tags.find(tag)
 	if tag_index < 0:
-		push_warning("could not find tag '%s'" % tag)
+		push_warning("%s: could not find tag '%s'" % [get_path(), tag])
 		return
 
 	# Note that an array is not the most performant data structure for set-like operations,
