@@ -224,6 +224,10 @@ func _change_state(new_state: FiniteState):
 	return current_state
 
 
+func has_active_tag(tag: StringName) -> bool:
+	return tag in active_tags
+
+
 func add_active_tag(tag: StringName):
 	var tag_index := active_tags.find(tag)
 	if tag_index >= 0:
