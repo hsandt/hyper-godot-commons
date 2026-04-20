@@ -158,8 +158,8 @@ func play_animation(animation_name: StringName):
 	# This works because we follow the convention to name all the animation tree nodes
 	# like the animations
 	if not animation_player.has_animation(animation_name):
-		push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation '%s'"
-			% [animation_player.get_parent().name, animation_name])
+		push_error("%s: play_animation: AnimationPlayer on %s has no animation '%s'"
+			% [get_path(), animation_player.get_parent().name, animation_name])
 		return
 
 	var last_animation := get_current_animation()
@@ -185,8 +185,8 @@ func play_animation(animation_name: StringName):
 			animation_player.play(&"RESET")
 			animation_player.advance(0)
 		else:
-			push_error("[AnimationControllerBase] play_animation: AnimationPlayer on %s has no animation 'RESET'"
-				% animation_player.get_parent().name)
+			push_error("%s: play_animation: AnimationPlayer on %s has no animation 'RESET'"
+				% [get_path(), animation_player.get_parent().name])
 
 		# Note that if you remove the hack above, in order to guarantee playing
 		# animation from start when the same animation is already playing,
@@ -220,7 +220,7 @@ func play_animation(animation_name: StringName):
 ## Pause current animation
 func pause_animation():
 	if is_paused:
-		push_warning("[AnimationControllerBase] pause_animation: animation controller '%s' is already paused, STOP" %
+		push_warning("%s: pause_animation: animation controller is already paused, STOP" %
 			get_path())
 		return
 
@@ -235,7 +235,7 @@ func pause_animation():
 ## Resume current animation
 func resume_animation():
 	if not is_paused:
-		push_warning("[AnimationControllerBase] resume_animation: animation controller '%s' is not paused, STOP" %
+		push_warning("%s: resume_animation: animation controller is not paused, STOP" %
 			get_path())
 		return
 
@@ -259,8 +259,8 @@ func play_override_animation(animation_name: StringName, force_restart: bool = t
 	# Note: animation_player.get_animation works when using animation tree
 	var animation_resource := animation_player.get_animation(animation_name)
 	if animation_resource and animation_resource.loop_mode != Animation.LOOP_NONE:
-		push_error("[AnimationControllerBase] Animation '%s' is expected not to loop, but it does. "
-			% animation_name,
+		push_error("%s: Animation '%s' is expected not to loop, but it does. "
+			% [get_path(), animation_name],
 			"Animation finished event will not be sent.")
 
 	if override_animation != animation_name or force_restart:
@@ -276,7 +276,7 @@ func clear_override_animation(animation: StringName):
 	if animation == override_animation:
 		clear_any_override_animation()
 	else:
-		push_error("[AnimationControllerBase] clear_override_animation: expecting passed animation '%s' to be " % animation,
+		push_error("%s: clear_override_animation: expecting passed animation '%s' to be " % [get_path(), animation],
 			"the same as override_animation '%s', but it differs. " % override_animation,
 			"We won't clear the override animation to be safe.")
 
@@ -289,7 +289,7 @@ func clear_any_override_animation():
 # abstract
 ## Return base animation based on owner state and last animation
 func _get_base_animation(_last_animation: StringName) -> StringName:
-	push_error("[AnimationControllerBase] _get_base_animation: abstract method requires implementation")
+	push_error("%s: _get_base_animation: abstract method requires implementation" % get_path())
 	return &""
 
 
