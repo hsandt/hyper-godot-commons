@@ -1,5 +1,7 @@
 class_name ShaderParameterController
 extends Node
+## A component that controls the appearance of canvas items
+##
 ## This script can modify the material shader parameters, as well as native modulate,
 ## on a list of assigned canvas items (or their parents), at runtime.
 ## Each canvas item should use material with a shader that supports the controlled parameters.
@@ -7,6 +9,15 @@ extends Node
 ## nodes, Local to Scene to distinguish from other scene instances including after scene reload),
 ## see shader_material member doc comment
 ## for more details.
+##
+## Note: if you know that brightness and modulate will be synced with the parent node,
+## enable Use Parent Material instead of adding each child to the list of Canvas Items.
+## This is also useful to disable warnings on recursive children of Canvas Items Parents
+## that are not relevant (such as intermediate Node2D with no visuals).
+## And modulate will automatically affects children.
+##
+## Caution: if you register children and still apply modulate on parent, it will stack (multiply)
+## modulate on the children
 ##
 ## Currently, the only supported shader parameter is "brightness" and is modified via hardcoded
 ## methods. Later, this may be replaced with a generic dictionary that supports any parameter
@@ -100,7 +111,7 @@ func register_canvas_item(canvas_item: CanvasItem):
 	if canvas_item not in cached_canvas_items:
 		cached_canvas_items.append(canvas_item)
 	else:
-		push_error("[ShaderParameterController] register_canvas_item: canvas_item '%s' is already in cached_canvas_items, " %
+		push_error("canvas_item '%s' is already in cached_canvas_items, " %
 			canvas_item.get_path(),
 			"please verify that canvas_items doesn't contain a recursive child of an element of canvas_item_parents")
 
@@ -147,9 +158,9 @@ func set_shader_brightness_on_all_canvas_items(new_brightness: float):
 		if shader_material:
 			shader_material.set_shader_parameter("brightness", new_brightness)
 		else:
-			push_error("[ShaderParameterController] set_shader_brightness_on_all_canvas_items: canvas item '%s' has no ShaderMaterial assigned, " %
-					cached_canvas_item.get_path(),
-				"skipping it.")
+			if not cached_canvas_item.use_parent_material:
+				push_warning("canvas item '%s' has no ShaderMaterial assigned " % cached_canvas_item.get_path(),
+					"and use_parent_material is false, so it will be skipped and will not have its brightness updated.")
 
 
 func set_modulate_on_all_canvas_items(new_modulate: Color):
