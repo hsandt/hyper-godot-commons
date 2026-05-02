@@ -1,10 +1,14 @@
 class_name CanvasItemWithPropertiesController
 extends CanvasItem
+## A derived class of CanvasItem that adds appearance control
+##
+## DEPRECATED: prefer using the more flexible ShaderParameterController which can control
+## multiple Canvas Items
+##
 ## This script allows us to set shader parameters "brightness" and native modulate
 ## on the animated sprite material, which should use the shader custom_sprite_shader.gdshader.
 ## Each entity should have its own material instance, see shader_material doc comment for more
 ## details.
-## If you are controlling many canvas items this way, prefer ShaderParameterController
 
 
 ## When true, update material brightness to match state variable every frame
