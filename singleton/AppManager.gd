@@ -139,29 +139,29 @@ func _ready():
 func _unhandled_input(event: InputEvent):
 	# let user toggle hi-dpi resolution freely
 	# (hi-dpi is hard to detect and resize is hard to force on start)
-	if _is_exact_action_pressed_in_event_safe(event, &"app_prev_resolution"):
+	if InputUtils.is_exact_action_defined_and_pressed_by_event(event, &"app_prev_resolution"):
 		change_resolution(-1)
 		get_viewport().set_input_as_handled()
-	elif _is_exact_action_pressed_in_event_safe(event, &"app_next_resolution"):
+	elif InputUtils.is_exact_action_defined_and_pressed_by_event(event, &"app_next_resolution"):
 		change_resolution(1)
 		get_viewport().set_input_as_handled()
 
-	if _is_exact_action_pressed_in_event_safe(event, &"app_toggle_fullscreen"):
+	if InputUtils.is_exact_action_defined_and_pressed_by_event(event, &"app_toggle_fullscreen"):
 		toggle_fullscreen()
 		get_viewport().set_input_as_handled()
 
-	if _is_exact_action_pressed_in_event_safe(event, &"app_toggle_debug_overlay") and debug_overlay:
+	if InputUtils.is_exact_action_defined_and_pressed_by_event(event, &"app_toggle_debug_overlay") and debug_overlay:
 		toggle_debug_overlay()
 		get_viewport().set_input_as_handled()
 
-	if _is_exact_action_pressed_in_event_safe(event, &"app_take_screenshot_native"):
+	if InputUtils.is_exact_action_defined_and_pressed_by_event(event, &"app_take_screenshot_native"):
 		take_screenshot(false)
 		get_viewport().set_input_as_handled()
-	elif _is_exact_action_pressed_in_event_safe(event, &"app_take_screenshot_scaled"):
+	elif InputUtils.is_exact_action_defined_and_pressed_by_event(event, &"app_take_screenshot_scaled"):
 		take_screenshot(true)
 		get_viewport().set_input_as_handled()
 
-	if _is_exact_action_pressed_in_event_safe(event, &"app_exit"):
+	if InputUtils.is_exact_action_defined_and_pressed_by_event(event, &"app_exit"):
 		get_tree().quit()
 		get_viewport().set_input_as_handled()
 
@@ -428,7 +428,3 @@ func save_screenshot_in(screenshot_filepath: String, scaled: bool):
 			" with error code: ", err)
 	else:
 		print("[AppManager] Saved %s screenshot in %s" % ["scaled" if scaled else "native", screenshot_filepath])
-
-
-func _is_exact_action_pressed_in_event_safe(event: InputEvent, action: StringName):
-	return InputMap.has_action(action) and event.is_action_pressed(action, false, true)
