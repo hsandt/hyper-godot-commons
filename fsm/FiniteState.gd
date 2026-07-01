@@ -91,8 +91,8 @@ func on_enter():
 ## Custom action on_physics_process when override_move returns true
 ## Only needs implementation if override_move may return true
 func on_physics_process(_delta: float):
-	push_error("not implemented on '%s', make sure to override it on child class when override_move returns true",
-		get_path())
+	push_error("not implemented on '%s', " % get_path(),
+		"make sure to override it on child class when override_move returns true")
 
 
 # virtual

@@ -16,6 +16,13 @@ extends Node
 ##   to change state immediately or on next frame
 
 
+
+@export_group("Parameters")
+
+## If true, print next state query when added
+@export var debug_next_state_query: bool = false
+
+
 # Dynamic parameters
 
 ## Owning entity
@@ -155,6 +162,10 @@ func set_next_state_by_name(next_state_name: StringName, allow_restart: bool = f
 	var callstack := get_stack() if OS.has_feature("debug") else []
 	var next_state_query = NextFiniteStateQuery.new(next_state_name, priority, callstack)
 	next_state_queries.append(next_state_query)
+
+	if debug_next_state_query:
+		print(next_state_query.to_simplified_string())
+
 	return found_next_state
 
 
