@@ -150,6 +150,16 @@ func get_current_animation() -> StringName:
 		return animation_player.assigned_animation
 
 
+## Return length/duration (s) of current animation or state
+func get_current_animation_length() -> float:
+	if animation_tree:
+		return state_machine.get_current_length()
+	else:
+		# Note that while current_animation is null at the end of a one-time animation,
+		# current_animation_length will be still be the finished animation length at that point
+		return animation_player.current_animation_length
+
+
 ## Play an animation from start
 func play_animation(animation_name: StringName):
 	# There is currently no method to check if animation node exists in Animation Tree
