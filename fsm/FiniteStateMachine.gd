@@ -67,11 +67,17 @@ func initialize(p_owner_entity: Node):
 			push_error("child '%s' is under a FiniteStateMachine node, yet not a FiniteState" % child.get_path())
 			continue
 
+		var state_name := state.get_state_name()
+		if state_name in states_dict:
+			push_error("State '%s' has same state name as '%s': '%s'. SKIPPING it to avoid overwriting dictionary entry." %
+				[state.get_path(), states_dict[state_name].get_path(), state_name])
+			continue
+
 		# Assign this state machine and owner entity to state and store in dict
 		# so it's accessible by its name identifier
 		state.state_machine = self
 		state.set_owner_entity(p_owner_entity)
-		states_dict[state.get_state_name()] = state
+		states_dict[state_name] = state
 
 		# Now that owner reference has been set, we can safely initialize the states
 		state.on_initialize()
