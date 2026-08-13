@@ -1,15 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://dr8nyt3mnijkp"]
+[gd_scene format=3 uid="uid://dr8nyt3mnijkp"]
 
 [ext_resource type="Script" uid="uid://dkl1yv4i1kdgy" path="res://addons/hyper-godot-commons/singleton/TransitionScreen.gd" id="1_hnan5"]
 [ext_resource type="AnimationLibrary" uid="uid://d24br0dr75gjg" path="res://addons/hyper-godot-commons/singleton/transition_screen_template_animation_library.tres" id="2_ti62w"]
 
-[node name="TransitionScreenTemplate" type="CanvasLayer" node_paths=PackedStringArray("animation_player")]
+[node name="TransitionScreenTemplate" type="CanvasLayer" unique_id=1737485080 node_paths=PackedStringArray("animation_player")]
 process_mode = 3
 layer = 10
 script = ExtResource("1_hnan5")
 animation_player = NodePath("AnimationPlayer")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1426330664]
 modulate = Color(0, 0, 0, 0)
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,7 +19,5 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-"": ExtResource("2_ti62w")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=690772657]
+libraries/ = ExtResource("2_ti62w")
