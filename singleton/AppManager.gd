@@ -371,7 +371,8 @@ func toggle_debug_overlay():
 
 ## Take a screenshot and save it in user path
 ## If scaled is true, use the current window scale
-## Else, use the native resolution
+## Else, use the native resolution (only works if Project setting
+## display/window/stretch/mode is "viewport")
 func take_screenshot(scaled: bool):
 	var datetime = Time.get_datetime_dict_from_system()
 
@@ -383,8 +384,8 @@ func take_screenshot(scaled: bool):
 	var screenshot_filepath = "user://Screenshots".path_join(screenshot_filename)
 
 	# user:// should map to:
-	# Windows: %APPDATA%\Godot\app_userdata\[project_name] or
-	#          %APPDATA%\[project_name/custom_user_dir_name]
+	# Windows: AppData\Roaming\Godot\app_userdata\[project_name] or
+	#          AppData\Roaming\[project_name/custom_user_dir_name]
 	# macOS: ~/Library/Application Support/Godot/app_userdata/[project_name] or
 	#        ~/Library/Application Support/[project_name/custom_user_dir_name]
 	# Linux: ~/.local/share/godot/app_userdata/[project_name] or
@@ -403,28 +404,72 @@ func take_screenshot(scaled: bool):
 func save_screenshot_in(screenshot_filepath: String, scaled: bool):
 	# Get image data from viewport texture (in Godot 4, this is already ready to use,
 	# no need to flip_y)
+	# At this point, image.get_size() should be get_native_window_size()
 	var image = get_viewport().get_texture().get_image()
 
+	# We must resize screenshot to target size in the following cases:
+	# - stretch mode is "viewport" and we want scaled screenshot (scale up image from native size to window size)
+	# - stretch mode is "canvas_items" and we want native screenshot (scale down image from window size to native size)
+	# While scale down sounds scarier, it turns out that it pixel-perfectly placed sprites
+	# are perfectly scaled back to their native resolution, and sprites with fractional pixel offsets
+	# are simply snapped to the closest pixel as if playing in "viewport" stretch mode
 	if ProjectSettings.get_setting("display/window/stretch/mode") != "disabled":
 		var target_screenshot_size := DisplayServer.window_get_size() if scaled else get_native_window_size()
-
-		# If needed, resize screenshot to target size
-		# In practice, this happens when:
-		# - stretch mode is "viewport" and we want scaled screenshot (scale up)
-		# - stretch mode is "canvas_items" and we want native screenshot (scale down)
-		# While scale down sounds scarier, it turns out that it pixel-perfectly placed sprites
-		# are perfectly scaled back to their native resolution, and sprites with fractional
-		# pixel offsets are simply snapped to the closest pixel as if playing in "viewport" stretch mode
 		if target_screenshot_size != image.get_size():
-			image.resize(target_screenshot_size.x, target_screenshot_size.y, Image.INTERPOLATE_NEAREST)
+			# If Project setting display/window/stretch/aspect is keep, we may get black bars
+			# at the top & bottom or the sides of the window when window is resized (in the editor,
+			# when using Embedded Window, this happens with Embedded Window Sizing > Stretch to Fit)
+			# If it is expand, the viewport is expanded when window is resized, changing the aspect ratio.
+			# If it is keep_width or keep_height, either one or the other effect will be applied depending on how the window is resized.
+			# However, a screenshot is always taken without the black bars and DisplayServer.window_get_size()
+			# always includes black bars or the expanded area, therefore target_screenshot_size
+			# won't have the same aspect ratio as the original image.
+			# We must take this into account to make sure we stretch the image texture uniformly.
+			var aspect_mode := ProjectSettings.get_setting("display/window/stretch/aspect")
+			if aspect_mode.begins_with("keep") or aspect_mode == "expand":
+				# Compare the image and target aspect ratio
+				var target_aspect_ratio := float(target_screenshot_size.x) / target_screenshot_size.y
+				var aspect_ratio := float(image.get_size().x) / image.get_size().y
 
-	# Else, when "display/window/stretch/mode" is "disabled", no stretching occurs
-	# so the screenshot is at native resolution but scaled window size
-	# and there is nothing meaningful to honor the scaled flag
+				# Normally, it's easy to detect black bars by checking that target aspect ratio
+				# is not the same as the captured image ratio
+				# However, in our tests, we noticed that aspect ratios may slightly differ even when we're supposed
+				# to have uniform window scaling, such as Embedded Window Sizing > Fixe;d Size
+				# due to imperfect integer pixel divisions, so we cannot just check target_aspect_ratio != aspect_ratio
+				# However, we found that the difference is very small (when using non-tiny resolutions):
+				# when scaled back to target height as reference, it would never go beyond 2px, so we used this
+				# as threshold to detect when
+				# Note that the expression below is merely the expansion of (target_aspect_ratio - aspect_ratio) * target_screenshot_size.y
+				var aspect_ratio_normalized_pixel_diff = float(target_screenshot_size.x) - aspect_ratio * target_screenshot_size.y
+				if abs(aspect_ratio_normalized_pixel_diff) >= 2.0:
+					# If true, use height as reference and deduce width from image aspect ratio
+					# Else, use width as reference and deduce height from image aspect ratio
+					var use_height_as_reference: bool
+
+					# Check aspect mode to decide which dimension to use as reference
+					# Basically, don't use the side that is expanded with black bars,
+					# but use the side that is expanded with actual world view
+					match aspect_mode:
+						"keep_height":
+							use_height_as_reference = true
+						"keep_width":
+							use_height_as_reference = false
+						"keep":
+							use_height_as_reference = aspect_ratio < target_aspect_ratio
+						"expand":
+							use_height_as_reference = aspect_ratio > target_aspect_ratio
+
+					if use_height_as_reference:
+						target_screenshot_size = Vector2i(roundi(aspect_ratio * target_screenshot_size.y), target_screenshot_size.y)
+					else:
+						target_screenshot_size = Vector2i(target_screenshot_size.x, roundi(target_screenshot_size.x / aspect_ratio))
+
+			# INTERPOLATE_NEAREST works well with pixel art games, but HD games may prefer another setting
+			image.resize(target_screenshot_size.x, target_screenshot_size.y, Image.INTERPOLATE_NEAREST)
 
 	var err = image.save_png(screenshot_filepath)
 	if err:
 		push_error("[AppManager] Failed to save screenshot in: ", screenshot_filepath,
 			" with error code: ", err)
 	else:
-		print("[AppManager] Saved %s screenshot in %s" % ["scaled" if scaled else "native", screenshot_filepath])
+		print("[AppManager] Saved %s screenshot of size %dx%d in %s" % ["scaled" if scaled else "native", image.get_size().x, image.get_size().y, screenshot_filepath])
