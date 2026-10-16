@@ -180,14 +180,14 @@ func _check_next_state():
 		selected_query = next_state_queries[0]
 	else:
 		# Else we sort queries by priority > ascending order in Array
-		var max_priority_found: int = MathConstants.INT64_MIN
+		var max_priority_found: int = INT64_MIN
 		for query in next_state_queries:
 			# strict < comparison: if same priority, earlier Array entry is prior
 			if max_priority_found < query.priority:
 				max_priority_found = query.priority
 				selected_query = query
 		if not selected_query:
-			push_error("%s: no query had priority > MathConstants.INT64_MIN, STOP" % get_path())
+			push_error("%s: no query had priority > INT64_MIN, STOP" % get_path())
 			return
 
 	var found_next_state = states_dict.get(selected_query.next_state_name) as FiniteState
