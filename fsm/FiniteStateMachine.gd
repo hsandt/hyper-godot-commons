@@ -32,10 +32,6 @@ var owner_entity: Node
 ## Dictionary of state name: StringName => state: FiniteState
 var states_dict: Dictionary#<StringName, FiniteState>
 
-## Base attributes dictionary
-## Filled in initialize from @export variables
-var base_attributes := {}
-
 # State
 
 ## Current state
@@ -49,14 +45,6 @@ var next_state_queries: Array[NextFiniteStateQuery]
 ## List of tags currently active
 ## Tags are added by states on start, and removed on finally
 var active_tags: Array[StringName]
-
-## List of attribute modifiers currently active
-## Attribute modifiers are added by states on start, and removed on finally
-var active_attribute_modifiers: Array[AttributeModifier]
-
-## Current attributes dictionary
-## Initialized with base_attributes and updated with Action attribute modifiers at runtime
-var current_attributes := {}
 
 
 func initialize(p_owner_entity: Node):
@@ -89,16 +77,10 @@ func setup():
 	current_state = null
 	next_state_queries.clear()
 
-	# Merge base attributes into current attributes with overwrite:
-	# - on first deferred_setup, this will effectively copy base attributes
-	# - on further deferred_setup calls, this will reset all current attributes
-	current_attributes.merge(base_attributes, true)
-
 
 func clear():
-	# Tags and attributes
+	# Tags
 	active_tags.clear()
-	active_attribute_modifiers.clear()
 
 
 func on_physics_process(delta: float):
@@ -221,14 +203,14 @@ func _check_next_state():
 func _change_state(new_state: FiniteState):
 	if current_state:
 		current_state.exit()
-		remove_state_tags_and_attribute_modifiers(current_state)
+		remove_state_active_tags(current_state)
 		current_state.on_transition_to(new_state)
 
 	#var old_state := current_state
 	current_state = new_state
 
 	current_state.on_enter()
-	add_state_tags_and_attribute_modifiers(current_state)
+	add_state_active_tags(current_state)
 
 	# DISABLED after refactoring to extract FiniteStateMachine
 	# because we don't have access to animation_controller,
@@ -283,18 +265,6 @@ func get_current_state_name() -> StringName:
 		return &""
 
 
-## Add all tags and attribute modifiers associated to passed state
-func add_state_tags_and_attribute_modifiers(state: FiniteState):
-	add_state_active_tags(state)
-	add_state_attribute_modifiers(state)
-
-
-## Remove all tags and attribute modifiers associated to passed state
-func remove_state_tags_and_attribute_modifiers(state: FiniteState):
-	remove_state_active_tags(state)
-	remove_state_attribute_modifiers(state)
-
-
 func add_state_active_tags(state: FiniteState):
 	active_tags.append_array(state.get_tags())
 
@@ -305,37 +275,3 @@ func remove_state_active_tags(state: FiniteState):
 		# but it supports redundant tags without having to manually track tag count
 		# Here, it will just erase the first tag it finds
 		active_tags.erase(tag)
-
-
-func add_state_attribute_modifiers(state: FiniteState):
-	add_attribute_modifiers(state.get_attribute_modifiers())
-
-
-func add_attribute_modifiers(attribute_modifiers: Array[AttributeModifier]):
-	active_attribute_modifiers.append_array(attribute_modifiers)
-
-	# Update all dirty attributes
-	# Note: this is suboptimal when state contains multiple
-	# attribute modifiers targeting the same attribute as only the final update
-	# for this attribute will matter, but this is a rare case
-	for attribute_modifier in attribute_modifiers:
-		update_current_attribute(attribute_modifier.attribute_name)
-
-
-func remove_state_attribute_modifiers(state: FiniteState):
-	var attribute_modifiers := state.get_attribute_modifiers()
-	for attribute_modifier in attribute_modifiers:
-		active_attribute_modifiers.erase(attribute_modifier)
-
-	# Update all dirty attributes
-	# Note: this is suboptimal in rare case, see add_attribute_modifiers
-	for attribute_modifier in attribute_modifiers:
-		update_current_attribute(attribute_modifier.attribute_name)
-
-
-func update_current_attribute(attribute_name: StringName):
-	var final_multiplier := 1.0
-	for active_attribute_modifier in active_attribute_modifiers:
-		final_multiplier *= active_attribute_modifier.multiplier
-
-	current_attributes[attribute_name] = final_multiplier * base_attributes[attribute_name]

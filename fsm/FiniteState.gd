@@ -69,12 +69,6 @@ func get_tags() -> Array[StringName]:
 
 
 # virtual
-## Return the list of attribute modifiers that are activated while this action is running
-func get_attribute_modifiers() -> Array[AttributeModifier]:
-	return []
-
-
-# virtual
 ## Called when state is initialized from the state machine, so that owner member
 ## is guaranteed to be defined
 func on_initialize():
