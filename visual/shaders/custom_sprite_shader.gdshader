@@ -1,6 +1,8 @@
 shader_type canvas_item;
 
-uniform float brightness : hint_range(0.0, 1.0) = 0.0;
+// Brightness may be positive (lighter color, up to pure white) or
+// negative (darker color, down to pure black)
+uniform float brightness : hint_range(-1.0, 1.0) = 0.0;
 
 // Custom modulate varying parameter, set it in vertex to COLOR when it is still just
 // MODULATE (inaccessible in Godot 4), then retrieve it in fragment and use it
@@ -87,9 +89,15 @@ void fragment() {
 	// Convert RGB to HSL
 	vec3 hsl = rgb2hsl(tex.rgb);
 
-	// Increase lightness based on brightness parameter
+	// Increase lightness based on positive brightness parameter,
+	// or decrease lightness based on negative brightness parameter
+	// If brightness is 0.0, preserve lightness
+	// Note: lightness evolves along a broken line, with a break
+	// at brightness = 0.0, so it's not C1 of brightness parameter
 	float lightness = hsl.z;
-	lightness = mix(lightness, 1, brightness);
+	float abs_brightness = abs(brightness);
+	float range_end = brightness >= 0.0 ? 1.0 : 0.0;
+	lightness = mix(lightness, range_end, abs_brightness);
 	hsl.z = lightness;
 
 	// Convert HSL back to RGB
