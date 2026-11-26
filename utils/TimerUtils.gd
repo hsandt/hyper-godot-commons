@@ -2,14 +2,14 @@ class_name TimerUtils
 ## Util static functions for Timer nodes
 
 
-## Create a periodic physics timer with optional interval and optional callback
+## Create a periodic process (visual) timer with optional interval and optional callback
 ## under given parent (often passing self), and return it
 ## If no interval is passed, a dummy wait_time of 1.0 is assigned, so you must
 ## make sure to always call timer.start passing a custom interval.
-static func create_periodic_physics_timer_under(parent: Node, interval: float = 1.0,
+static func create_periodic_process_timer_under(parent: Node, interval: float = 1.0,
 		callback: Callable = Callable()) -> Timer:
 	var timer := Timer.new()
-	timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
+	timer.process_callback = Timer.TIMER_PROCESS_IDLE  # default
 	timer.wait_time = interval
 
 	# Callable is not nullable, so default is empty Callable() and check uses `is_valid`
@@ -20,13 +20,36 @@ static func create_periodic_physics_timer_under(parent: Node, interval: float = 
 	return timer
 
 
+## Create a one-shot process (visual) timer with optional duration and optional callback
+## under given parent (often passing self), and return it
+## If no duration is passed, a dummy wait_time of 1.0 is assigned, so you must
+## make sure to always call timer.start passing a custom duration.
+static func create_one_shot_process_timer_under(parent: Node, duration: float = 1.0,
+		callback: Callable = Callable()) -> Timer:
+	var timer := create_periodic_process_timer_under(parent, duration, callback)
+	timer.one_shot = true
+	return timer
+
+
+## Create a periodic physics timer with optional interval and optional callback
+## under given parent (often passing self), and return it
+## If no interval is passed, a dummy wait_time of 1.0 is assigned, so you must
+## make sure to always call timer.start passing a custom interval.
+static func create_periodic_physics_timer_under(parent: Node, interval: float = 1.0,
+		callback: Callable = Callable()) -> Timer:
+	var timer := create_periodic_process_timer_under(parent, interval, callback)
+	timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
+	return timer
+
+
 ## Create a one-shot physics timer with optional duration and optional callback
 ## under given parent (often passing self), and return it
 ## If no duration is passed, a dummy wait_time of 1.0 is assigned, so you must
 ## make sure to always call timer.start passing a custom duration.
 static func create_one_shot_physics_timer_under(parent: Node, duration: float = 1.0,
 		callback: Callable = Callable()) -> Timer:
-	var timer := create_periodic_physics_timer_under(parent, duration, callback)
+	var timer := create_periodic_process_timer_under(parent, duration, callback)
+	timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
 	timer.one_shot = true
 	return timer
 
